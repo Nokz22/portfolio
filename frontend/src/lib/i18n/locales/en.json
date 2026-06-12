@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "about": "About",
+    "experience": "Experience",
+    "skills": "Skills",
+    "projects": "Projects",
+    "contact": "Contact"
+  },
+  "hero": {
+    "available": "Open to new opportunities",
+    "cta_primary": "View projects",
+    "cta_secondary": "Download CV"
+  },
+  "about": {
+    "title": "About",
+    "download_cv": "Download CV"
+  },
+  "experience": {
+    "title": "Experience",
+    "present": "Present"
+  },
+  "skills": {
+    "title": "Skills",
+    "levels": {
+      "expert": "Expert",
+      "advanced": "Advanced",
+      "intermediate": "Intermediate",
+      "learning": "Learning"
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "view": "View project",
+    "github": "Source",
+    "stars": "stars",
+    "loading": "Loading projects...",
+    "error": "Could not load projects"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Have a project in mind? Let's talk.",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send message",
+    "sending": "Sending...",
+    "success": "Message sent. Thank you!",
+    "error": "Failed to send. Please try again."
+  },
+  "footer": {
+    "rights": "All rights reserved"
+  }
+}

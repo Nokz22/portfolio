@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Motion & Color Tokens as CSS Custom Properties ─────────────
+   Mirrored from tailwind.config.ts for use in arbitrary CSS
+   and animation libraries (GSAP, Framer Motion).
+   ──────────────────────────────────────────────────────────────── */
+:root {
+  /* Easing — keep in sync with tailwind.config.ts + motion-tokens.ts */
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-cubic:  cubic-bezier(0.32, 0, 0.67, 0);
+
+  /* Duration */
+  --dur-instant:  150ms;
+  --dur-fast:     300ms;
+  --dur-moderate: 500ms;
+  --dur-slow:     700ms;
+
+  /* Palette */
+  --color-surface:        #FAFAFC;
+  --color-surface-raised: #F0F0F5;
+  --color-ink-950:        #0F0F12;
+  --color-ink-600:        #52525F;
+  --color-ink-300:        #A0A0AD;
+  --color-border:         #DCDCE8;
+  --color-accent:         #E07B00;
+  --color-accent-dim:     #C46800;
+}
+
+/* ── Base ────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: theme('fontFamily.body');
+    color: theme('colors.ink.950');
+    background-color: theme('colors.surface.DEFAULT');
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Lenis overrides scroll-behavior — don't set it here */
+  }
+
+  /* Headings use the display face */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: theme('fontFamily.display');
+  }
+
+  /* WCAG 2.1 AA — visible focus for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid theme('colors.accent.DEFAULT');
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ── prefers-reduced-motion ──────────────────────────────────────
+   Blanket kill-switch for all CSS transitions/animations.
+   JS animations (GSAP, Framer Motion) check the useReducedMotion
+   hook at the component level — this handles everything else.
+   ──────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

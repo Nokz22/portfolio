@@ -1,0 +1,70 @@
+plugins {
+    id 'org.springframework.boot' version '3.3.2'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'java'
+    id 'checkstyle'
+    id 'jacoco'
+}
+
+group = 'dev.nokz22'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Cache
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+
+    // Rate limiting (contact form anti-spam)
+    implementation 'com.bucket4j:bucket4j-core:8.10.1'
+
+    // JSON (content files)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Lombok — reduce boilerplate on DTOs and models
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+    }
+}
+
+checkstyle {
+    toolVersion = '10.17.0'
+    config = resources.text.fromFile('checkstyle.xml')
+    maxWarnings = 0
+}

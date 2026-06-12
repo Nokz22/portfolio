@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "about": "Sobre",
+    "experience": "Experiência",
+    "skills": "Skills",
+    "projects": "Projectos",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "available": "Disponível para novas oportunidades",
+    "cta_primary": "Ver projectos",
+    "cta_secondary": "Descarregar CV"
+  },
+  "about": {
+    "title": "Sobre mim",
+    "download_cv": "Descarregar CV"
+  },
+  "experience": {
+    "title": "Experiência",
+    "present": "Presente"
+  },
+  "skills": {
+    "title": "Skills",
+    "levels": {
+      "expert": "Especialista",
+      "advanced": "Avançado",
+      "intermediate": "Intermédio",
+      "learning": "A aprender"
+    }
+  },
+  "projects": {
+    "title": "Projectos",
+    "view": "Ver projecto",
+    "github": "Código",
+    "stars": "estrelas",
+    "loading": "A carregar projectos...",
+    "error": "Não foi possível carregar os projectos"
+  },
+  "contact": {
+    "title": "Contacto",
+    "subtitle": "Tens um projecto em mente? Fala comigo.",
+    "name": "Nome",
+    "email": "Email",
+    "message": "Mensagem",
+    "send": "Enviar mensagem",
+    "sending": "A enviar...",
+    "success": "Mensagem enviada. Obrigado!",
+    "error": "Erro ao enviar. Tenta novamente."
+  },
+  "footer": {
+    "rights": "Todos os direitos reservados"
+  }
+}

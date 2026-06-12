@@ -1,0 +1,28 @@
+[
+  {
+    "domain": "Backend",
+    "skills": [
+      { "name": "Java",        "level": "expert"       },
+      { "name": "Spring Boot", "level": "expert"       },
+      { "name": "SQL",         "level": "advanced"     },
+      { "name": "REST APIs",   "level": "expert"       },
+      { "name": "Docker",      "level": "advanced"     }
+    ]
+  },
+  {
+    "domain": "Frontend",
+    "skills": [
+      { "name": "React",       "level": "advanced"     },
+      { "name": "TypeScript",  "level": "advanced"     },
+      { "name": "HTML / CSS",  "level": "advanced"     }
+    ]
+  },
+  {
+    "domain": "DevOps & Ferramentas",
+    "skills": [
+      { "name": "Git",          "level": "expert"      },
+      { "name": "GitHub Actions","level": "advanced"   },
+      { "name": "Linux",        "level": "advanced"    }
+    ]
+  }
+]

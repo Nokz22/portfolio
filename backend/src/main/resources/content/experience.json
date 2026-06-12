@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "company": "TODO: Empresa",
+    "role": "TODO: Cargo",
+    "startDate": "2023-01",
+    "endDate": null,
+    "current": true,
+    "location": "TODO: Cidade, País",
+    "description": "TODO: Descrição do cargo — usa verbos de acção (Desenvolvi, Liderou, Reduziu latência em X%) em vez de responsabilidades genéricas.",
+    "technologies": ["Java", "Spring Boot", "React", "TypeScript", "Docker"]
+  },
+  {
+    "id": 2,
+    "company": "TODO: Empresa Anterior",
+    "role": "TODO: Cargo Anterior",
+    "startDate": "2021-06",
+    "endDate": "2022-12",
+    "current": false,
+    "location": "TODO: Cidade, País",
+    "description": "TODO: Descrição do cargo anterior.",
+    "technologies": ["TODO: tech1", "TODO: tech2"]
+  }
+]
