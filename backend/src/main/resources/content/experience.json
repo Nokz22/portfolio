@@ -1,24 +1,107 @@
 [
   {
     "id": 1,
-    "company": "TODO: Empresa",
-    "role": "TODO: Cargo",
-    "startDate": "2023-01",
+    "type": "work",
+    "company": "Paiva Digital",
+    "role": "WordPress Developer",
+    "startDate": "2026-01",
     "endDate": null,
     "current": true,
-    "location": "TODO: Cidade, País",
-    "description": "TODO: Descrição do cargo — usa verbos de acção (Desenvolvi, Liderou, Reduziu latência em X%) em vez de responsabilidades genéricas.",
-    "technologies": ["Java", "Spring Boot", "React", "TypeScript", "Docker"]
+    "location": "Porto, Portugal",
+    "description": {
+      "pt": "Desenvolvimento de websites institucionais e e-commerce para múltiplos clientes usando WordPress e WooCommerce. Gestão end-to-end dos projectos, desde a arquitectura até à entrega ao cliente, com formação técnica incluída.",
+      "en": "Building institutional and e-commerce websites for multiple clients using WordPress and WooCommerce. End-to-end project ownership from architecture to client handover, including technical onboarding sessions."
+    },
+    "technologies": ["WordPress", "WooCommerce", "HTML", "CSS", "JavaScript"]
   },
   {
     "id": 2,
-    "company": "TODO: Empresa Anterior",
-    "role": "TODO: Cargo Anterior",
-    "startDate": "2021-06",
-    "endDate": "2022-12",
+    "type": "work",
+    "company": "Store Repair",
+    "role": "Full Stack Developer",
+    "startDate": "2026-01",
+    "endDate": "2026-01",
     "current": false,
-    "location": "TODO: Cidade, País",
-    "description": "TODO: Descrição do cargo anterior.",
-    "technologies": ["TODO: tech1", "TODO: tech2"]
+    "location": "Porto, Portugal",
+    "description": {
+      "pt": "Desenho e desenvolvimento de uma plataforma e-commerce completa, com foco em arquitectura, design orientado à experiência do utilizador e integrações de negócio core.",
+      "en": "Designed and built a full e-commerce platform including architecture, UX-focused design, and core business integrations."
+    },
+    "technologies": ["HTML", "CSS", "JavaScript", "WooCommerce"]
+  },
+  {
+    "id": 3,
+    "type": "work",
+    "company": "Store Repair",
+    "role": "Hardware & Software Technician",
+    "startDate": "2025-07",
+    "endDate": "2026-01",
+    "current": false,
+    "location": "Porto, Portugal",
+    "description": {
+      "pt": "Diagnóstico e reparação de telemóveis, computadores, TVs e electrodomésticos. Suporte técnico presencial e acompanhamento pós-reparação.",
+      "en": "Fault diagnosis and repair of phones, computers, TVs, and appliances. Customer-facing technical support and repair follow-up."
+    },
+    "technologies": []
+  },
+  {
+    "id": 4,
+    "type": "education",
+    "company": "CodeForAll",
+    "role": "Software Engineering & AI",
+    "startDate": "2025-11",
+    "endDate": "2026-05",
+    "current": false,
+    "location": "Porto, Portugal",
+    "description": {
+      "pt": "Formação intensiva em desenvolvimento de software: Java (OOP, MVC), desenvolvimento web full-stack, bases de dados e metodologias ágeis. Projecto final em equipa de 4 — GLaDINATOR, um guesser estilo Akinator com backend Java e frontend JavaScript.",
+      "en": "Intensive software engineering programme: Java (OOP, MVC), full-stack web development, databases, and agile. Final team project of 4 — GLaDINATOR, an Akinator-style guesser with Java backend and JavaScript frontend."
+    },
+    "technologies": ["Java", "HTML", "CSS", "JavaScript", "MySQL", "Git"]
+  },
+  {
+    "id": 5,
+    "type": "work",
+    "company": "SPT Logistic",
+    "role": "Logistics Operations Admin",
+    "startDate": "2023-02",
+    "endDate": "2025-06",
+    "current": false,
+    "location": "Porto, Portugal",
+    "description": {
+      "pt": "Gestão de mercadoria ADR e não-ADR com software logístico para controlo de stock e rastreio de envios. Coordenação com transportadoras e clientes internacionais para compliance e entregas no prazo.",
+      "en": "Managed ADR and non-ADR goods using logistics software for stock control and shipment tracking. Coordinated with carriers and international clients for compliance and on-time deliveries."
+    },
+    "technologies": []
+  },
+  {
+    "id": 6,
+    "type": "work",
+    "company": "Boite",
+    "role": "Head Bartender",
+    "startDate": "2020-01",
+    "endDate": "2023-02",
+    "current": false,
+    "location": "Porto, Portugal",
+    "description": {
+      "pt": "Gestão das operações de bar: stock, coordenação de equipa e optimização de fluxos de trabalho. Liderança sob pressão e implementação de melhorias que aumentaram eficiência, qualidade e rentabilidade.",
+      "en": "Led bar operations: stock management, team coordination, and workflow optimisation. Implemented improvements increasing efficiency, quality, and profitability under high-pressure conditions."
+    },
+    "technologies": []
+  },
+  {
+    "id": 7,
+    "type": "education",
+    "company": "Universidade da Maia",
+    "role": "Licenciatura em Psicologia",
+    "startDate": "2019-01",
+    "endDate": "2023-12",
+    "current": false,
+    "location": "Maia, Portugal",
+    "description": {
+      "pt": "Formação em comportamento humano, comunicação e dinâmicas de equipa. Uma base inesperadamente útil para desenvolvimento de software centrado no utilizador.",
+      "en": "Foundation in human behaviour, communication, and team dynamics — an unexpectedly useful base for user-centred software development."
+    },
+    "technologies": []
   }
 ]

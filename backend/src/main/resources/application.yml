@@ -42,9 +42,10 @@ portfolio:
     username: ${GITHUB_USERNAME:Nokz22}
     token: ${GITHUB_TOKEN:}
     pinned-repos:
-      # TODO: fill in 2-4 repo slugs to feature in Projects section
-      - placeholder-repo-1
-      - placeholder-repo-2
+      - SuecaGame
+      - GLaDINATOR
+      - segue-o-ritmo
+      - blackjack-trainer
   contact:
     recipient-email: ${CONTACT_RECIPIENT_EMAIL:${MAIL_USERNAME:}}
     rate-limit-per-hour: 5

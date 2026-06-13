@@ -1,10 +1,16 @@
 {
-  "name": "TODO: Nome Completo",
-  "title": "TODO: Título Profissional",
-  "location": "TODO: Cidade, Portugal",
-  "email": "TODO@email.com",
+  "name": "Nuno Ferreira",
+  "title": "Junior Software Developer",
+  "location": "Porto, Portugal",
+  "email": "nunopferreira01@gmail.com",
+  "phone": "+351 934 594 893",
   "github": "https://github.com/Nokz22",
-  "linkedin": "https://linkedin.com/in/TODO",
-  "summary": "TODO: Resumo profissional em 2-3 frases. O que fazes, o que te distingue, o que procuras.",
-  "cvUrl": "/cv-TODO.pdf"
+  "linkedin": "https://www.linkedin.com/in/nuno-ferreira-a02552203/",
+  "cvUrl": "/cv-nuno-ferreira.pdf",
+
+  "summary": {
+    "pt": "Tecnologia e programação fascinaram-me desde sempre, mas o meu percurso não foi linear — e é exactamente isso que me distingue.\n\nComecei por estudar Psicologia, uma área que me ensinou a compreender comportamento humano, comunicação e dinâmicas de equipa. Em paralelo, trabalhei anos em hospitalidade, chegando a Head Bartender com responsabilidade sobre operações, equipas e rentabilidade. Encontrei uma analogia inesperada: criar cocktails e desenvolver software partilham o mesmo processo — criatividade, experimentação, atenção ao detalhe e refinamento contínuo até o resultado ser o certo.\n\nPosteriormente, transitei para logística operacional, onde desenvolvi o rigor analítico e o pensamento orientado a processos que hoje aplico directamente no código. Em novembro de 2025, tomei a decisão definitiva: inscrevi-me no curso de Software Engineering & AI na CodeForAll e comprometi-me a 100% com a área que sempre quis seguir.\n\nHoje trabalho como developer e encaro cada projecto como uma oportunidade de aprender, crescer e construir soluções com impacto real. O meu caminho pode não ter sido o mais convencional — mas cada etapa contribuiu para o developer que estou a tornar-me.",
+
+    "en": "Technology and programming have fascinated me for as long as I can remember — but my path here was anything but straight, and that's exactly what sets me apart.\n\nI started by studying Psychology, which taught me how to understand human behaviour, communication, and team dynamics. In parallel, I spent years in hospitality, eventually leading bar operations as Head Bartender. I found an unexpected parallel: crafting cocktails and writing code share the same process — creativity, experimentation, attention to detail, and continuous refinement.\n\nI then moved into logistics operations, where I developed the analytical rigour and process-oriented mindset I now apply directly to software. In November 2025, I made the definitive commitment: I enrolled in a Software Engineering & AI programme and went all in.\n\nToday I approach every project as an opportunity to learn, grow, and ship solutions that create real impact. My path wasn't conventional — but every step shaped the developer I'm becoming."
+  }
 }

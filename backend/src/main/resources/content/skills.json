@@ -1,28 +1,37 @@
 [
   {
-    "domain": "Backend",
+    "domain": "Linguagens & Web",
     "skills": [
-      { "name": "Java",        "level": "expert"       },
-      { "name": "Spring Boot", "level": "expert"       },
-      { "name": "SQL",         "level": "advanced"     },
-      { "name": "REST APIs",   "level": "expert"       },
-      { "name": "Docker",      "level": "advanced"     }
+      { "name": "Java",        "level": "advanced"     },
+      { "name": "HTML / CSS",  "level": "advanced"     },
+      { "name": "JavaScript",  "level": "intermediate" },
+      { "name": "MySQL",       "level": "intermediate" }
     ]
   },
   {
-    "domain": "Frontend",
+    "domain": "Frameworks & Plataformas",
     "skills": [
-      { "name": "React",       "level": "advanced"     },
-      { "name": "TypeScript",  "level": "advanced"     },
-      { "name": "HTML / CSS",  "level": "advanced"     }
+      { "name": "WordPress",   "level": "advanced"     },
+      { "name": "WooCommerce", "level": "advanced"     },
+      { "name": "REST APIs",   "level": "intermediate" }
     ]
   },
   {
-    "domain": "DevOps & Ferramentas",
+    "domain": "Ferramentas & Práticas",
     "skills": [
-      { "name": "Git",          "level": "expert"      },
-      { "name": "GitHub Actions","level": "advanced"   },
-      { "name": "Linux",        "level": "advanced"    }
+      { "name": "Git / GitHub", "level": "intermediate" },
+      { "name": "OOP",          "level": "advanced"     },
+      { "name": "MVC",          "level": "advanced"     },
+      { "name": "Agile",        "level": "intermediate" }
+    ]
+  },
+  {
+    "domain": "A aprender",
+    "skills": [
+      { "name": "Spring Boot",  "level": "learning"    },
+      { "name": "React",        "level": "learning"    },
+      { "name": "TypeScript",   "level": "learning"    },
+      { "name": "Docker",       "level": "learning"    }
     ]
   }
 ]
