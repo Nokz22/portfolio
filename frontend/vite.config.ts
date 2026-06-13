@@ -38,7 +38,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         // PROXY_TARGET set to http://backend:8080 in Docker; fallback for local dev
-        target: process.env['PROXY_TARGET'] ?? 'http://localhost:8080',
+        target: process.env['PROXY_TARGET'] ?? 'http://localhost:8090',
         changeOrigin: true,
       },
     },

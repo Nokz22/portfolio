@@ -5,6 +5,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import CustomCursor from '@/components/ui/CustomCursor'
 import ScrollMarquee from '@/components/ui/ScrollMarquee'
+import ScrollStory from '@/components/ui/ScrollStory'
 import Hero from '@/components/sections/Hero'
 import About from '@/components/sections/About'
 import Experience from '@/components/sections/Experience'
@@ -44,6 +45,10 @@ export default function Home() {
 
         <About />
         <Experience />
+
+        {/* Scroll-scrubbed story — pinned section that advances with scroll */}
+        <ScrollStory />
+
         <Skills />
         <Projects />
         <Contact />
