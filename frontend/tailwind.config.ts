@@ -31,8 +31,8 @@ const config: Config = {
 
       // ── Typography ─────────────────────────────────────────────
       fontFamily: {
-        display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
-        body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Bricolage Grotesque Variable"', 'system-ui', 'sans-serif'],
+        body: ['"Plus Jakarta Sans Variable"', 'system-ui', 'sans-serif'],
       },
 
       // ── Type Scale (modular, tracking tightened at display sizes) ─

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0F0F12"/>
+
+  <!-- Subtle grid texture -->
+  <defs>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ffffff08" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="glow" cx="25%" cy="60%" r="50%">
+      <stop offset="0%" stop-color="#E07B00" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#E07B00" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="80%" cy="30%" r="40%">
+      <stop offset="0%" stop-color="#E07B00" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#E07B00" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+
+  <!-- Accent bar -->
+  <rect x="80" y="200" width="5" height="120" fill="#E07B00" rx="2"/>
+
+  <!-- Name -->
+  <text x="112" y="272" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="#FFFFFF" letter-spacing="-2">Nuno Ferreira</text>
+
+  <!-- Title -->
+  <text x="112" y="330" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="400" fill="#7F7F8C" letter-spacing="0">Junior Software Developer</text>
+
+  <!-- Location -->
+  <text x="112" y="390" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="400" fill="#52525F">Porto, Portugal</text>
+
+  <!-- Tech tags -->
+  <g transform="translate(112, 440)">
+    <rect width="110" height="36" rx="18" fill="#E07B0020" stroke="#E07B0050" stroke-width="1"/>
+    <text x="55" y="24" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#E07B00" text-anchor="middle">Spring Boot</text>
+  </g>
+  <g transform="translate(234, 440)">
+    <rect width="80" height="36" rx="18" fill="#E07B0020" stroke="#E07B0050" stroke-width="1"/>
+    <text x="40" y="24" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#E07B00" text-anchor="middle">React</text>
+  </g>
+  <g transform="translate(326, 440)">
+    <rect width="120" height="36" rx="18" fill="#E07B0020" stroke="#E07B0050" stroke-width="1"/>
+    <text x="60" y="24" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#E07B00" text-anchor="middle">TypeScript</text>
+  </g>
+  <g transform="translate(458, 440)">
+    <rect width="70" height="36" rx="18" fill="#E07B0020" stroke="#E07B0050" stroke-width="1"/>
+    <text x="35" y="24" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#E07B00" text-anchor="middle">Docker</text>
+  </g>
+
+  <!-- Domain -->
+  <text x="1120" y="580" font-family="system-ui, sans-serif" font-size="18" font-weight="500" fill="#555" text-anchor="end">nunoferreira.dev</text>
+</svg>

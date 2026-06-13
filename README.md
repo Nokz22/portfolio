@@ -1,29 +1,39 @@
-# Portfolio — Nokz22
+# Portfolio — Nuno Ferreira
 
-> Personal portfolio and CV website built to production standard. The codebase itself is the proof of skill.
+> Personal portfolio built to production standard. The codebase itself is the proof of skill.
+
+[![CI](https://github.com/Nokz22/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/Nokz22/portfolio/actions/workflows/ci.yml)
+
+**Live:** https://nunoferreira.dev &nbsp;·&nbsp; [LinkedIn](https://www.linkedin.com/in/nuno-ferreira-a02552203/) &nbsp;·&nbsp; [GitHub](https://github.com/Nokz22)
+
+---
 
 ## Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 18 · TypeScript strict · Vite · Tailwind CSS |
-| Animation | GSAP + ScrollTrigger · Lenis · Framer Motion · OGL (WebGL) |
+| Animation | GSAP · Lenis · Framer Motion · OGL (WebGL shader) |
 | Backend | Spring Boot 3 · Java 17 · REST API v1 |
-| Cache | Caffeine (GitHub API responses, 15 min TTL) |
+| Cache | Caffeine (GitHub API, 15 min TTL) |
 | i18n | react-i18next (PT-PT primary, EN secondary) |
+| Fonts | @fontsource-variable (self-hosted, no Google Fonts CDN) |
 | Infra | Docker multi-stage · GitHub Actions CI/CD · Railway |
 
 ## Architecture
 
 ```
-Browser → React SPA (Vite)
-            ↓ /api/v1/*
-         Spring Boot 3
-            ↓ cache-aside
-         GitHub API  /  JSON content files  /  SMTP
+Browser → React SPA (Vite + Nginx)
+              ↓ /api/v1/*
+          Spring Boot 3
+              ├── Caffeine cache (GitHub API)
+              ├── JSON content files (profile, experience, skills)
+              └── JavaMailSender (SMTP contact form)
 ```
 
 All secrets are environment variables — nothing hardcoded. See `.env.example`.
+
+---
 
 ## Quick Start
 
@@ -31,9 +41,9 @@ All secrets are environment variables — nothing hardcoded. See `.env.example`.
 
 - Node.js 20+
 - Java 17+ (Temurin recommended)
-- Docker + Docker Compose (optional, for containerised dev)
+- Docker + Docker Compose (optional)
 
-### With Docker
+### With Docker (development)
 
 ```bash
 git clone https://github.com/Nokz22/portfolio.git
@@ -43,7 +53,7 @@ docker compose up --build
 ```
 
 - Frontend: http://localhost:3000
-- Backend: http://localhost:8080/api/v1
+- Backend API: http://localhost:8080/api/v1
 
 ### Without Docker
 
@@ -60,52 +70,119 @@ npm run dev
 
 > **First-time backend setup:** if `./gradlew` is missing, run `gradle wrapper` once in `backend/`.
 
+### Production build (local test)
+
+```bash
+cp .env.example .env  # set VITE_API_URL and CORS_ALLOWED_ORIGINS
+docker compose -f docker-compose.prod.yml up --build
+```
+
+---
+
 ## Development Scripts
 
 ### Frontend (`cd frontend`)
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Vite dev server with HMR |
-| `npm run build` | TypeScript check + production build |
+| `npm run dev` | Vite dev server with HMR on :3000 |
+| `npm run build` | TypeScript check + production bundle |
 | `npm run lint` | ESLint (zero warnings policy) |
 | `npm run format` | Prettier |
-| `npm test` | Vitest in watch mode |
-| `npm run test:ci` | Vitest single run (CI) |
+| `npm test` | Vitest watch mode |
+| `npm run test:ci` | Vitest single run + coverage |
 
 ### Backend (`cd backend`)
 
 | Command | Description |
 |---------|-------------|
-| `./gradlew bootRun` | Start dev server with hot reload |
-| `./gradlew test` | JUnit tests |
+| `./gradlew bootRun` | Start dev server |
+| `./gradlew test` | JUnit tests + JaCoCo coverage |
 | `./gradlew bootJar` | Build fat JAR |
-| `./gradlew checkstyleMain` | Checkstyle |
+| `./gradlew checkstyleMain` | Checkstyle (zero warnings) |
+
+---
+
+## Deployment (Railway)
+
+### First deploy
+
+1. Create a [Railway](https://railway.app) account and a new project
+2. Add two services: `portfolio-frontend` and `portfolio-backend`
+3. Point each service to this repo with the correct root directory (`frontend/` and `backend/`)
+4. Set environment variables in the Railway dashboard (see `.env.example`)
+5. Generate a Railway API token and add it as a GitHub secret named `RAILWAY_TOKEN`
+6. Push to `main` — GitHub Actions deploys automatically
+
+### Environment variables (Railway dashboard)
+
+**Backend service:**
+```
+GITHUB_USERNAME=Nokz22
+GITHUB_TOKEN=ghp_...
+MAIL_USERNAME=your@gmail.com
+MAIL_PASSWORD=app_password_16chars
+CONTACT_RECIPIENT_EMAIL=your@gmail.com
+CORS_ALLOWED_ORIGINS=https://your-frontend.railway.app
+```
+
+**Frontend service (build argument):**
+```
+VITE_API_URL=https://your-backend.railway.app
+```
+
+### CI/CD pipeline
+
+```
+Push to main
+    │
+    ├── ci.yml  → lint → typecheck → test → build (both services)
+    │
+    └── deploy.yml (on ci pass) → railway up --service portfolio-backend
+                                → railway up --service portfolio-frontend
+```
+
+---
 
 ## Project Structure
 
 ```
-personal-website/
-├── frontend/               # React SPA
+portfolio/
+├── frontend/                    # React SPA
 │   ├── src/
-│   │   ├── components/     # ui/ · layout/ · sections/ · motion/
-│   │   ├── hooks/          # Custom hooks
-│   │   ├── lib/            # api client · i18n · motion tokens
-│   │   ├── pages/          # Route-level components (lazy loaded)
-│   │   └── types/          # DTO types (mirrors backend)
-│   └── public/             # Static assets, robots.txt, sitemap.xml
+│   │   ├── components/
+│   │   │   ├── layout/          # Navbar, Footer
+│   │   │   ├── sections/        # Hero, About, Experience, Skills, Projects, Contact
+│   │   │   ├── ui/              # CustomCursor, SkeletonLoader, LanguageToggle, SkipToContent
+│   │   │   └── webgl/           # ForgeShader (OGL)
+│   │   ├── hooks/               # useProfile, useExperience, useSkills, useProjects, useContactForm
+│   │   ├── lib/                 # api client · i18n · motion tokens
+│   │   ├── pages/               # Home, ProjectDetail, NotFound (lazy-loaded)
+│   │   └── types/               # DTO interfaces (mirrors backend)
+│   ├── public/                  # favicon.svg, og-image.svg, robots.txt, sitemap.xml
+│   ├── nginx.conf               # SPA routing + cache headers + CSP
+│   └── Dockerfile               # multi-stage: dev / build / nginx runtime
 │
-├── backend/                # Spring Boot API
+├── backend/                     # Spring Boot REST API
 │   └── src/main/java/dev/nokz22/portfolio/
-│       ├── controller/     # REST controllers (/api/v1/*)
-│       ├── service/        # Business logic
-│       ├── repository/     # Data access (JSON Phase 1, PostgreSQL Phase 2)
-│       ├── dto/            # Request/response DTOs (never expose entities)
-│       └── config/         # CORS, cache, security, rate limiting
+│       ├── config/              # Security, CORS, cache, rate limiter, GitHub client
+│       ├── controller/          # ContentController, ProjectController, ContactController
+│       ├── service/             # ContentService, GithubService, ContactService
+│       ├── repository/          # ContentRepository interface + JsonContentRepository
+│       ├── dto/                 # Request/response DTOs (never expose models directly)
+│       ├── model/               # Internal data models
+│       └── exception/           # GlobalExceptionHandler (RFC 7807), custom exceptions
+│   └── src/main/resources/
+│       ├── content/             # profile.json, experience.json, skills.json
+│       └── application.yml
 │
-├── .github/workflows/      # CI (lint→test→build) + deploy (Railway)
-└── docker-compose.yml
+├── .github/workflows/           # ci.yml + deploy.yml
+├── docker-compose.yml           # Development (hot reload)
+├── docker-compose.prod.yml      # Production (multi-stage builds)
+└── .env.example                 # All required environment variables
 ```
+
+---
 
 ## Quality Targets
 
@@ -118,20 +195,26 @@ personal-website/
 | Core bundle (gzipped) | < 150 KB |
 | WCAG | 2.1 AA |
 
-## Architecture Decisions
+---
 
-| ADR | Decision | Choice | Rationale |
-|-----|----------|--------|-----------|
-| 001 | Repo structure | Monorepo | Atomic cross-stack commits, unified CI |
-| 002 | Backend runtime | Spring Boot 3 | Server-side GitHub cache, rate limiting, demonstrates backend skills |
-| 003 | Frontend build | Vite + React Router | No SSR need; smaller bundle than Next.js; pure React |
-| 004 | Content storage | JSON files → interface | Zero DB in Phase 1; repository abstraction enables PG migration without touching controllers |
-| 005 | Animation | GSAP + Framer Motion | ScrollTrigger best-in-class for scrubbed scroll; AnimatePresence for routes |
-| 006 | WebGL | OGL (~8 KB) | Single shader doesn't justify Three.js (~600 KB) |
-| 007 | i18n | react-i18next | Industry standard, tree-shakeable, type-safe |
-| 008 | Bundle strategy | Lazy chunks | GSAP/Lenis/OGL outside 150 KB core budget |
-| 009 | Contact form | JavaMailSender | Email is what the owner needs; DB adds complexity without value |
-| 010 | Rate limiting | Bucket4j in-process | Redis overkill at this scale |
+## Architecture Decisions (ADR)
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 001 | Repo structure | Monorepo | Atomic cross-stack commits, single CI pipeline |
+| 002 | Backend runtime | Spring Boot 3 | Server-side GitHub cache, rate limiting, showcases Java skills |
+| 003 | Frontend build | Vite + React Router | No SSR needed; leaner than Next.js; pure React |
+| 004 | Content storage | JSON files + repository interface | Zero DB complexity in Phase 1; abstraction enables PostgreSQL migration without touching controllers/services |
+| 005 | Animation | GSAP + Framer Motion + Lenis | GSAP for cursor/scroll; Framer Motion for page transitions; Lenis for smooth scroll momentum |
+| 006 | WebGL | OGL (~8 KB) | Single shader doesn't justify Three.js (~600 KB) — stays within 150 KB bundle budget |
+| 007 | i18n | react-i18next | Industry standard; LanguageDetector + JSON files; hooks re-render on lang change |
+| 008 | Bundle chunks | manualChunks (Vite) | vendor-motion, vendor-scroll, vendor-webgl as separate lazy chunks |
+| 009 | Contact anti-spam | Honeypot + Bucket4j rate limit | No CAPTCHA UX friction; honeypot silent-fails bots; 5 req/h per IP prevents flooding |
+| 010 | Rate limiting | Bucket4j in-process | Redis would be overkill at this traffic level; ConcurrentHashMap is thread-safe |
+| 011 | Fonts | @fontsource-variable (self-hosted) | Eliminates Google Fonts CDN dependency, DNS lookup, and render-blocking; WOFF2 served from same origin |
+| 012 | Security headers | Spring Security + Nginx CSP | Backend handles HSTS/X-Frame/X-Content-Type; Nginx adds CSP, Permissions-Policy |
+
+---
 
 ## License
 
