@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/lib/api/client'
+import { STATIC_SKILLS } from '@/data/static'
 import type { SkillGroupDto } from '@/types/api'
 
 export function useSkills() {
@@ -13,7 +14,10 @@ export function useSkills() {
     api
       .get<SkillGroupDto[]>('/api/v1/skills')
       .then(setData)
-      .catch((err: unknown) => setError(err instanceof Error ? err : new Error(String(err))))
+      .catch(() => {
+        setData(STATIC_SKILLS)
+        setError(null)
+      })
       .finally(() => setIsLoading(false))
   }, [])
 

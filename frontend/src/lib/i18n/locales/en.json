@@ -38,13 +38,18 @@
   },
   "contact": {
     "title": "Contact",
-    "subtitle": "Have a project in mind? Let's talk.",
-    "name": "Name",
+    "open_to_work": "Open to work",
+    "subtitle": "I'm building my career as a developer and looking for my next opportunity. If you represent a company with a position that matches my profile, I'd love to hear from you.",
+    "type_fulltime": "Full-time",
+    "type_freelance": "Freelance",
+    "type_porto": "Porto",
+    "type_remote": "Remote",
+    "name": "Name / Company",
     "email": "Email",
     "message": "Message",
     "send": "Send message",
     "sending": "Sending...",
-    "success": "Message sent. Thank you!",
+    "success": "Message sent. I'll get back to you soon!",
     "error": "Failed to send. Please try again."
   },
   "footer": {

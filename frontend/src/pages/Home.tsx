@@ -4,6 +4,7 @@ import Lenis from 'lenis'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import CustomCursor from '@/components/ui/CustomCursor'
+import ScrollMarquee from '@/components/ui/ScrollMarquee'
 import Hero from '@/components/sections/Hero'
 import About from '@/components/sections/About'
 import Experience from '@/components/sections/Experience'
@@ -37,6 +38,10 @@ export default function Home() {
       <Navbar />
       <main id="main-content" aria-label="Portfolio">
         <Hero />
+
+        {/* Scroll-linked marquee — separates Hero from content */}
+        <ScrollMarquee />
+
         <About />
         <Experience />
         <Skills />

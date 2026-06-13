@@ -5,27 +5,27 @@ import { SkeletonLoader } from '@/components/ui/SkeletonLoader'
 import { fadeUp } from '@/lib/motion-tokens'
 import type { ExperienceDto } from '@/types/api'
 
-const MONTH_NAMES = new Map<string, string>([
-  ['01', 'Jan'], ['02', 'Fev'], ['03', 'Mar'], ['04', 'Abr'],
-  ['05', 'Mai'], ['06', 'Jun'], ['07', 'Jul'], ['08', 'Ago'],
-  ['09', 'Set'], ['10', 'Out'], ['11', 'Nov'], ['12', 'Dez'],
-])
-
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, lang: string): string {
   const parts = dateStr.split('-')
-  const year = parts[0] ?? dateStr
+  const year = parts[0]
   const month = parts[1]
+  if (!year) return dateStr
   if (!month) return year
-  const monthName = MONTH_NAMES.get(month) ?? month
-  return `${monthName} ${year}`
+  try {
+    const date = new Date(parseInt(year), parseInt(month) - 1)
+    return new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(date)
+  } catch {
+    return `${month}/${year}`
+  }
 }
 
 interface ExperienceCardProps {
   entry: ExperienceDto
   reduced: boolean | null
+  lang: string
 }
 
-function ExperienceCard({ entry, reduced }: ExperienceCardProps) {
+function ExperienceCard({ entry, reduced, lang }: ExperienceCardProps) {
   const { t } = useTranslation()
 
   const motionProps = reduced
@@ -37,8 +37,8 @@ function ExperienceCard({ entry, reduced }: ExperienceCardProps) {
         variants: fadeUp,
       }
 
-  const start = formatDate(entry.startDate)
-  const end = entry.current ? t('experience.present') : (entry.endDate ? formatDate(entry.endDate) : '')
+  const start = formatDate(entry.startDate, lang)
+  const end = entry.current ? t('experience.present') : (entry.endDate ? formatDate(entry.endDate, lang) : '')
 
   return (
     <motion.div {...motionProps} className="relative pl-10">
@@ -48,43 +48,52 @@ function ExperienceCard({ entry, reduced }: ExperienceCardProps) {
         aria-hidden="true"
       />
 
-      <article className="bg-surface rounded-xl p-6 border border-ink-100">
+      <motion.article
+        className="bg-surface rounded-xl p-6 border border-ink-100 cursor-default"
+        whileHover={reduced ? {} : {
+          y: -4,
+          borderColor: 'rgba(224, 123, 0, 0.3)',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.07)',
+        }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+      >
         <header className="flex flex-wrap items-start justify-between gap-3 mb-3">
           <div>
-            <h3 className="font-display font-semibold text-heading-xl text-ink-950">
+            <h3 className="font-display font-semibold text-xl text-ink-950">
               {entry.role}
             </h3>
-            <p className="text-body-md text-ink-600 font-medium">{entry.company}</p>
+            <p className="text-base text-ink-600 font-medium">{entry.company}</p>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="text-label-sm text-ink-600">
+            <span className="text-sm text-ink-600 font-medium">
               {start} – {end}
             </span>
+            <span className="text-xs text-ink-400">{entry.location}</span>
           </div>
         </header>
 
-        <p className="text-body-md text-ink-600 mb-4">{entry.description}</p>
+        <p className="text-sm text-ink-600 mb-4 leading-relaxed">{entry.description}</p>
 
         {entry.technologies.length > 0 && (
           <div className="flex flex-wrap gap-2" aria-label="Technologies">
             {entry.technologies.map((tech) => (
               <span
                 key={tech}
-                className="bg-surface-raised text-ink-600 text-label-sm px-2 py-0.5 rounded"
+                className="bg-surface-raised text-ink-600 text-xs font-medium px-2.5 py-1 rounded-md border border-ink-100"
               >
                 {tech}
               </span>
             ))}
           </div>
         )}
-      </article>
+      </motion.article>
     </motion.div>
   )
 }
 
 export default function Experience() {
-  const { t } = useTranslation()
-  const { data: entries, isLoading, error } = useExperience()
+  const { t, i18n } = useTranslation()
+  const { data: entries, isLoading } = useExperience()
   const reduced = useReducedMotion()
 
   const titleMotion = reduced
@@ -106,12 +115,12 @@ export default function Experience() {
         {/* Section header */}
         <motion.div {...titleMotion} className="flex flex-col gap-2 mb-12">
           <span
-            className="font-display text-display-xl text-accent/20 font-bold leading-none select-none"
+            className="font-display text-[clamp(4rem,8vw,7rem)] text-accent/15 font-bold leading-none select-none"
             aria-hidden="true"
           >
             02
           </span>
-          <h2 className="font-display text-display-sm text-ink-950 font-semibold">
+          <h2 className="font-display text-[clamp(1.8rem,4vw,3rem)] text-ink-950 font-bold">
             {t('experience.title')}
           </h2>
         </motion.div>
@@ -125,10 +134,6 @@ export default function Experience() {
           </div>
         )}
 
-        {error && (
-          <p className="text-body-md text-ink-400">{error.message}</p>
-        )}
-
         {entries && entries.length > 0 && (
           <div className="relative">
             {/* Vertical line */}
@@ -136,9 +141,9 @@ export default function Experience() {
               className="absolute left-0 top-0 bottom-0 w-px bg-ink-100"
               aria-hidden="true"
             />
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6">
               {entries.map((entry) => (
-                <ExperienceCard key={entry.id} entry={entry} reduced={reduced} />
+                <ExperienceCard key={entry.id} entry={entry} reduced={reduced} lang={i18n.language} />
               ))}
             </div>
           </div>

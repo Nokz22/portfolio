@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api/client'
+import { STATIC_EXPERIENCE } from '@/data/static'
 import type { ExperienceDto } from '@/types/api'
 
 export function useExperience() {
@@ -12,10 +13,14 @@ export function useExperience() {
   useEffect(() => {
     setIsLoading(true)
     setError(null)
+    const lang = i18n.language.startsWith('en') ? 'en' : 'pt'
     api
       .get<ExperienceDto[]>(`/api/v1/experience?lang=${i18n.language}`)
       .then(setData)
-      .catch((err: unknown) => setError(err instanceof Error ? err : new Error(String(err))))
+      .catch(() => {
+        setData(STATIC_EXPERIENCE[lang])
+        setError(null)
+      })
       .finally(() => setIsLoading(false))
   }, [i18n.language])
 

@@ -39,7 +39,7 @@ export default function Footer() {
 
         <div className="flex items-center gap-4">
           <a
-            href="https://github.com/nokzbbox"
+            href="https://github.com/Nokz22"
             target="_blank"
             rel="noopener noreferrer"
             className="text-ink-400 hover:text-white transition-colors duration-fast"
@@ -48,7 +48,7 @@ export default function Footer() {
             <GitHubIcon />
           </a>
           <a
-            href="https://linkedin.com/in/nunopferreira01"
+            href="https://www.linkedin.com/in/nuno-ferreira-a02552203/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-ink-400 hover:text-white transition-colors duration-fast"

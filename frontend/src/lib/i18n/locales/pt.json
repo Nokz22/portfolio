@@ -38,13 +38,18 @@
   },
   "contact": {
     "title": "Contacto",
-    "subtitle": "Tens um projecto em mente? Fala comigo.",
-    "name": "Nome",
+    "open_to_work": "Disponível para emprego",
+    "subtitle": "Estou a construir o meu percurso como developer e à procura da minha próxima oportunidade. Se representas uma empresa com uma posição que se adequa ao meu perfil, gostaria muito de conversar.",
+    "type_fulltime": "Full-time",
+    "type_freelance": "Freelance",
+    "type_porto": "Porto",
+    "type_remote": "Remoto",
+    "name": "Nome / Empresa",
     "email": "Email",
     "message": "Mensagem",
     "send": "Enviar mensagem",
     "sending": "A enviar...",
-    "success": "Mensagem enviada. Obrigado!",
+    "success": "Mensagem enviada. Entro em contacto em breve!",
     "error": "Erro ao enviar. Tenta novamente."
   },
   "footer": {

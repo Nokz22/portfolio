@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/lib/api/client'
+import { STATIC_PROJECTS } from '@/data/static'
 import type { GithubRepoDto } from '@/types/api'
 
 export function useProjects() {
@@ -13,7 +14,10 @@ export function useProjects() {
     api
       .get<GithubRepoDto[]>('/api/v1/projects')
       .then(setData)
-      .catch((err: unknown) => setError(err instanceof Error ? err : new Error(String(err))))
+      .catch(() => {
+        setData(STATIC_PROJECTS)
+        setError(null)
+      })
       .finally(() => setIsLoading(false))
   }, [])
 
