@@ -57,7 +57,7 @@ function ExperienceCard({ entry, reduced }: ExperienceCardProps) {
             <p className="text-body-md text-ink-600 font-medium">{entry.company}</p>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="text-label-sm text-ink-400">
+            <span className="text-label-sm text-ink-600">
               {start} – {end}
             </span>
           </div>

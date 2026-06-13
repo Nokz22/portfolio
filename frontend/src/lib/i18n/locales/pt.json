@@ -49,5 +49,8 @@
   },
   "footer": {
     "rights": "Todos os direitos reservados"
+  },
+  "a11y": {
+    "skipToContent": "Saltar para o conteúdo"
   }
 }

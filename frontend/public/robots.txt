@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# TODO Phase 3: replace TODO.com with real domain
-Sitemap: https://TODO.com/sitemap.xml
+Sitemap: https://nunoferreira.dev/sitemap.xml

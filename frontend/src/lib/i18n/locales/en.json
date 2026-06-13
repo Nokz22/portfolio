@@ -49,5 +49,8 @@
   },
   "footer": {
     "rights": "All rights reserved"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
   }
 }

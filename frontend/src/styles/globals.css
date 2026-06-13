@@ -58,6 +58,31 @@
   }
 }
 
+/* ── Skip to content link (WCAG 2.4.1) ──────────────────────────
+   Hidden until focused — lets keyboard users jump past the Navbar.
+   Must be the very first focusable element in the DOM.
+   ──────────────────────────────────────────────────────────────── */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0 0 8px 8px;
+  text-decoration: none;
+  transition: top 0.15s var(--ease-out-cubic);
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 /* ── prefers-reduced-motion ──────────────────────────────────────
    Blanket kill-switch for all CSS transitions/animations.
    JS animations (GSAP, Framer Motion) check the useReducedMotion
