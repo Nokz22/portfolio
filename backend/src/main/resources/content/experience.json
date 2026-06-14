@@ -54,8 +54,8 @@
     "current": false,
     "location": "Porto, Portugal",
     "description": {
-      "pt": "Formação intensiva em desenvolvimento de software: Java (OOP, MVC), desenvolvimento web full-stack, bases de dados e metodologias ágeis. Projecto final em equipa de 4 — GLaDINATOR, um guesser estilo Akinator com backend Java e frontend JavaScript.",
-      "en": "Intensive software engineering programme: Java (OOP, MVC), full-stack web development, databases, and agile. Final team project of 4 — GLaDINATOR, an Akinator-style guesser with Java backend and JavaScript frontend."
+      "pt": "Formação intensiva em desenvolvimento de software: Java (OOP, MVC), desenvolvimento web full-stack, bases de dados e metodologias ágeis. Projecto final em equipa de 4: GLaDINATOR, um guesser estilo Akinator com backend Java e frontend JavaScript.",
+      "en": "Intensive software engineering programme: Java (OOP, MVC), full-stack web development, databases, and agile. Final team project of 4: GLaDINATOR, an Akinator-style guesser with Java backend and JavaScript frontend."
     },
     "technologies": ["Java", "HTML", "CSS", "JavaScript", "MySQL", "Git"]
   },
@@ -100,7 +100,7 @@
     "location": "Maia, Portugal",
     "description": {
       "pt": "Formação em comportamento humano, comunicação e dinâmicas de equipa. Uma base inesperadamente útil para desenvolvimento de software centrado no utilizador.",
-      "en": "Foundation in human behaviour, communication, and team dynamics — an unexpectedly useful base for user-centred software development."
+      "en": "Foundation in human behaviour, communication, and team dynamics, an unexpectedly useful base for user-centred software development."
     },
     "technologies": []
   }

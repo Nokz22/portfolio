@@ -8,9 +8,9 @@ export const STATIC_PROFILE: Record<'pt' | 'en', ProfileDto> = {
     email: 'nunopferreira01@gmail.com',
     github: 'https://github.com/Nokz22',
     linkedin: 'https://www.linkedin.com/in/nuno-ferreira-a02552203/',
-    cvUrl: '/cv-nuno-ferreira.pdf',
+    cvUrl: '/Nuno-Ferreira-CV.pdf',
     summary:
-      'Tecnologia e programação fascinaram-me desde sempre, mas o meu percurso não foi linear — e é exactamente isso que me distingue.\n\nComecei por estudar Psicologia, uma área que me ensinou a compreender comportamento humano, comunicação e dinâmicas de equipa. Em paralelo, trabalhei anos em hospitalidade, chegando a Head Bartender com responsabilidade sobre operações, equipas e rentabilidade. Encontrei uma analogia inesperada: criar cocktails e desenvolver software partilham o mesmo processo — criatividade, experimentação, atenção ao detalhe e refinamento contínuo.\n\nPosteriormente, transitei para logística operacional, onde desenvolvi o rigor analítico e o pensamento orientado a processos que hoje aplico directamente no código. Em novembro de 2025, comprometi-me a 100%: inscrevi-me no curso de Software Engineering & AI na CodeForAll.\n\nHoje encaro cada projecto como uma oportunidade de aprender, crescer e construir soluções com impacto real.',
+      'Tecnologia e programação fascinaram-me desde sempre, mas o meu percurso não foi linear, e é exactamente isso que me distingue.\n\nComecei por estudar Psicologia, uma área que me ensinou a compreender comportamento humano, comunicação e dinâmicas de equipa. Em paralelo, trabalhei anos em hospitalidade, chegando a Head Bartender com responsabilidade sobre operações, equipas e rentabilidade. Encontrei uma analogia inesperada: criar cocktails e desenvolver software partilham o mesmo processo: criatividade, experimentação, atenção ao detalhe e refinamento contínuo.\n\nPosteriormente, transitei para logística operacional, onde desenvolvi o rigor analítico e o pensamento orientado a processos que hoje aplico directamente no código. Em novembro de 2025, comprometi-me a 100%: inscrevi-me no curso de Software Engineering & AI na CodeForAll.\n\nHoje encaro cada projecto como uma oportunidade de aprender, crescer e construir soluções com impacto real.',
   },
   en: {
     name: 'Nuno Ferreira',
@@ -19,9 +19,9 @@ export const STATIC_PROFILE: Record<'pt' | 'en', ProfileDto> = {
     email: 'nunopferreira01@gmail.com',
     github: 'https://github.com/Nokz22',
     linkedin: 'https://www.linkedin.com/in/nuno-ferreira-a02552203/',
-    cvUrl: '/cv-nuno-ferreira.pdf',
+    cvUrl: '/Nuno-Ferreira-CV.pdf',
     summary:
-      "Technology and programming have fascinated me for as long as I can remember — but my path here was anything but straight, and that's exactly what sets me apart.\n\nI started by studying Psychology, which taught me how to understand human behaviour, communication, and team dynamics. In parallel, I spent years in hospitality, eventually leading bar operations as Head Bartender. I found an unexpected parallel: crafting cocktails and writing code share the same process — creativity, experimentation, attention to detail, and continuous refinement.\n\nI then moved into logistics operations, where I developed the analytical rigour and process-oriented mindset I now apply directly to software. In November 2025, I made the definitive commitment: I enrolled in a Software Engineering & AI programme and went all in.\n\nToday I approach every project as an opportunity to learn, grow, and ship solutions that create real impact.",
+      "Technology and programming have fascinated me for as long as I can remember, but my path here was anything but straight, and that's exactly what sets me apart.\n\nI started by studying Psychology, which taught me how to understand human behaviour, communication, and team dynamics. In parallel, I spent years in hospitality, eventually leading bar operations as Head Bartender. I found an unexpected parallel: crafting cocktails and writing code share the same process: creativity, experimentation, attention to detail, and continuous refinement.\n\nI then moved into logistics operations, where I developed the analytical rigour and process-oriented mindset I now apply directly to software. In November 2025, I made the definitive commitment: I enrolled in a Software Engineering & AI programme and went all in.\n\nToday I approach every project as an opportunity to learn, grow, and ship solutions that create real impact.",
   },
 }
 
@@ -71,7 +71,7 @@ const EXPERIENCE_PT: ExperienceDto[] = [
     current: false,
     location: 'Porto, Portugal',
     description:
-      'Formação intensiva em desenvolvimento de software: Java (OOP, MVC), desenvolvimento web full-stack, bases de dados e metodologias ágeis. Projecto final em equipa de 4 — GLaDINATOR, um guesser estilo Akinator com backend Java e frontend JavaScript.',
+      'Formação intensiva em desenvolvimento de software: Java (OOP, MVC), desenvolvimento web full-stack, bases de dados e metodologias ágeis. Projecto final em equipa de 4: GLaDINATOR, um guesser estilo Akinator com backend Java e frontend JavaScript.',
     technologies: ['Java', 'HTML', 'CSS', 'JavaScript', 'MySQL', 'Git'],
   },
   {
@@ -134,7 +134,7 @@ const EXPERIENCE_EN: ExperienceDto[] = [
     current: false,
     location: 'Porto, Portugal',
     description:
-      'Intensive software engineering programme: Java (OOP, MVC), full-stack web development, databases, and agile. Final team project of 4 — GLaDINATOR, an Akinator-style guesser with Java backend and JavaScript frontend.',
+      'Intensive software engineering programme: Java (OOP, MVC), full-stack web development, databases, and agile. Final team project of 4: GLaDINATOR, an Akinator-style guesser with Java backend and JavaScript frontend.',
     technologies: ['Java', 'HTML', 'CSS', 'JavaScript', 'MySQL', 'Git'],
   },
   {
