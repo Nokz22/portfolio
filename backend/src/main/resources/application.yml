@@ -34,7 +34,7 @@ management:
         include: health
   endpoint:
     health:
-      show-details: never
+      show-details: always
 
 # Application-specific config
 portfolio:
