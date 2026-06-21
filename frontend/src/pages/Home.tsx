@@ -4,10 +4,14 @@ import Lenis from 'lenis'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import CustomCursor from '@/components/ui/CustomCursor'
+import Grain from '@/components/ui/Grain'
+import ScrollProgress from '@/components/ui/ScrollProgress'
 import ScrollMarquee from '@/components/ui/ScrollMarquee'
 import ScrollStory from '@/components/ui/ScrollStory'
 import Hero from '@/components/sections/Hero'
+import LaptopReveal from '@/components/sections/LaptopReveal'
 import About from '@/components/sections/About'
+import StatsSection from '@/components/sections/StatsSection'
 import Experience from '@/components/sections/Experience'
 import Skills from '@/components/sections/Skills'
 import Projects from '@/components/sections/Projects'
@@ -35,15 +39,21 @@ export default function Home() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
+      <Grain />
       <CustomCursor />
+      <ScrollProgress />
       <Navbar />
       <main id="main-content" aria-label="Portfolio">
         <Hero />
 
-        {/* Scroll-linked marquee — separates Hero from content */}
+        {/* Scroll-linked laptop opening — transitions hero into content */}
+        <LaptopReveal />
+
+        {/* Scroll-linked marquee — separates intro from content */}
         <ScrollMarquee />
 
         <About />
+        <StatsSection />
         <Experience />
 
         {/* Scroll-scrubbed story — pinned section that advances with scroll */}

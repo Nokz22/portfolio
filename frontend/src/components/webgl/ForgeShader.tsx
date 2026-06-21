@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { useReducedMotion } from 'framer-motion'
 import { Renderer, Triangle, Program, Mesh } from 'ogl'
 
 const VERTEX = /* glsl */ `
@@ -68,17 +67,28 @@ void main() {
 }
 `
 
+// CSS gradient that mimics the amber-orb output for reduced-motion users
+function StaticGlow() {
+  return (
+    <div
+      className="absolute inset-0"
+      style={{
+        background: `
+          radial-gradient(ellipse 65% 75% at 20% 60%, rgba(224,123,0,0.10) 0%, transparent 65%),
+          radial-gradient(ellipse 50% 55% at 80% 30%, rgba(224,123,0,0.07) 0%, transparent 55%),
+          radial-gradient(ellipse 45% 50% at 50% 88%, rgba(224,123,0,0.04) 0%, transparent 65%),
+          #0f0f12
+        `,
+      }}
+      aria-hidden="true"
+    />
+  )
+}
+
 export default function ForgeShader() {
-  const reduced = useReducedMotion()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const prefersReduced =
-    reduced ??
-    (typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-
   useEffect(() => {
-    if (prefersReduced) return
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -101,7 +111,6 @@ export default function ForgeShader() {
     })
     const mesh = new Mesh(gl, { geometry, program })
 
-    // Lerped mouse position — smooth shader tracking
     let targetX = 0.5, targetY = 0.5
     let currentX = 0.5, currentY = 0.5
 
@@ -137,9 +146,10 @@ export default function ForgeShader() {
       window.removeEventListener('mousemove', onMouseMove)
       renderer.gl.getExtension('WEBGL_lose_context')?.loseContext()
     }
-  }, [prefersReduced])
+  }, [])
 
-  if (prefersReduced) return null
+  // Show static gradient as fallback while WebGL initialises
+  if (typeof window === 'undefined') return <StaticGlow />
 
   return (
     <canvas

@@ -7,6 +7,7 @@ import {
   MotionValue,
 } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import AmbientOrbs from '@/components/ui/AmbientOrbs'
 
 interface Chapter {
   eyebrow: string
@@ -174,8 +175,9 @@ export default function ScrollStory() {
   // If reduced motion, show a simple static grid instead
   if (reduced) {
     return (
-      <section className="bg-ink-950 py-24 px-6" aria-label="Stack">
-        <div className="max-w-content mx-auto grid sm:grid-cols-2 gap-8">
+      <section id="stack" className="relative bg-ink-950 py-24 px-6 overflow-hidden" aria-label="Stack">
+        <AmbientOrbs />
+        <div className="relative z-10 max-w-content mx-auto grid sm:grid-cols-2 gap-8">
           {CHAPTERS.map((ch) => (
             <div key={ch.index} className="text-center">
               <p className="text-accent text-xs tracking-widest uppercase mb-2">{ch.eyebrow}</p>
@@ -197,6 +199,7 @@ export default function ScrollStory() {
     >
       {/* Sticky viewport — stays pinned while user scrolls through the container */}
       <div className="sticky top-0 h-screen bg-ink-950 overflow-hidden">
+        <AmbientOrbs />
         {/* Chapters — stacked absolutely, each fades in/out */}
         {CHAPTERS.map((ch, i) => {
           const inStart  = i * span

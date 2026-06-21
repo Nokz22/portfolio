@@ -21,13 +21,13 @@
     "skills": [
       { "name": "Git / GitHub", "level": "intermediate" },
       { "name": "OOP",          "level": "advanced"     },
-      { "name": "MVC",          "level": "advanced"     },
-      { "name": "Agile",        "level": "intermediate" }
+      { "name": "MVC",          "level": "advanced"     }
     ]
   },
   {
     "domain": "A aprender",
     "skills": [
+      { "name": "Agile",        "level": "learning"     },
       { "name": "Spring Boot",  "level": "learning"    },
       { "name": "React",        "level": "learning"    },
       { "name": "TypeScript",   "level": "learning"    },

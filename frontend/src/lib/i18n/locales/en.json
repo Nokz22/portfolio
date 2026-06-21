@@ -6,10 +6,27 @@
     "projects": "Projects",
     "contact": "Contact"
   },
+  "laptop": {
+    "scroll_label": "Scroll",
+    "open_env": "To open the environment"
+  },
   "hero": {
     "available": "Open to new opportunities",
     "cta_primary": "View projects",
-    "cta_secondary": "Download CV"
+    "cta_secondary": "Download CV",
+    "phrases": ["Junior Software Developer", "React & Spring Boot Dev", "CodeForAll Bootcamp", "Porto, Portugal"]
+  },
+  "stats": {
+    "eyebrow": "By the numbers",
+    "section_label": "Stats",
+    "tech_label": "Technologies",
+    "tech_desc": "Languages, frameworks and tools in active use",
+    "months_label": "Months of training",
+    "months_desc": "Software Engineering & AI bootcamp completed at CodeForAll",
+    "years_label": "Years of experience",
+    "years_desc": "Leadership in hospitality and logistics operations",
+    "commit_label": "Commitment",
+    "commit_desc": "100% dedicated to the transition into tech"
   },
   "about": {
     "title": "About",
@@ -26,6 +43,12 @@
       "advanced": "Advanced",
       "intermediate": "Intermediate",
       "learning": "Learning"
+    },
+    "domains": {
+      "Linguagens & Web": "Languages & Web",
+      "Frameworks & Plataformas": "Frameworks & Platforms",
+      "Ferramentas & Práticas": "Tools & Practices",
+      "A aprender": "Learning"
     }
   },
   "projects": {
@@ -43,7 +66,7 @@
     "type_fulltime": "Full-time",
     "type_freelance": "Freelance",
     "type_porto": "Porto",
-    "type_remote": "Remote",
+    "type_remote": "Remote / Hybrid",
     "name": "Name / Company",
     "email": "Email",
     "message": "Message",

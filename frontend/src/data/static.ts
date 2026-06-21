@@ -180,12 +180,12 @@ export const STATIC_SKILLS: SkillGroupDto[] = [
       { name: 'Git / GitHub', level: 'intermediate' },
       { name: 'OOP', level: 'advanced' },
       { name: 'MVC', level: 'advanced' },
-      { name: 'Agile', level: 'intermediate' },
     ],
   },
   {
     domain: 'A aprender',
     skills: [
+      { name: 'Agile', level: 'learning' },
       { name: 'Spring Boot', level: 'learning' },
       { name: 'React', level: 'learning' },
       { name: 'TypeScript', level: 'learning' },

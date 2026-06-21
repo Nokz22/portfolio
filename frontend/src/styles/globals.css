@@ -83,16 +83,34 @@
   outline-offset: 2px;
 }
 
-/* ── prefers-reduced-motion ──────────────────────────────────────
-   Blanket kill-switch for all CSS transitions/animations.
-   JS animations (GSAP, Framer Motion) check the useReducedMotion
-   hook at the component level — this handles everything else.
-   ──────────────────────────────────────────────────────────────── */
+/* ── Continuous marquee keyframes ───────────────────────────────── */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Grain / noise overlay ───────────────────────────────────────── */
+@keyframes grain {
+  0%,100% { transform: translate(0,    0)    }
+  10%     { transform: translate(-5%,  -10%) }
+  20%     { transform: translate(-15%,  5%)  }
+  30%     { transform: translate(7%,  -25%)  }
+  40%     { transform: translate(-5%,  25%)  }
+  50%     { transform: translate(-15%, 10%)  }
+  60%     { transform: translate(15%,   0)   }
+  70%     { transform: translate(0,    15%)  }
+  80%     { transform: translate(3%,   35%)  }
+  90%     { transform: translate(-10%, 10%)  }
+}
+
+/* prefers-reduced-motion — only kill spinning/looping effects,
+   not entrance animations or transitions (this is a motion portfolio) */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .animate-spin, .animate-bounce, .animate-ping {
+    animation: none !important;
   }
 }
