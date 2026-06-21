@@ -11,16 +11,10 @@ spring:
       spec: maximumSize=200,expireAfterWrite=15m
 
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:465}
+    host: smtp.gmail.com
+    port: 587
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.ssl.enable: true
-      mail.smtp.ssl.trust: smtp.gmail.com
-      mail.smtp.connectiontimeout: 8000
-      mail.smtp.timeout: 8000
 
   jackson:
     default-property-inclusion: non_null
@@ -35,9 +29,15 @@ management:
         include: health
   endpoint:
     health:
-      show-details: always
+      show-details: never
+  health:
+    mail:
+      enabled: false
 
 # Application-specific config
+resend:
+  api-key: ${RESEND_API_KEY:}
+
 portfolio:
   github:
     username: ${GITHUB_USERNAME:Nokz22}

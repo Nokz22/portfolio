@@ -3,9 +3,6 @@ package dev.nokz22.portfolio.service;
 import dev.nokz22.portfolio.config.PortfolioProperties;
 import dev.nokz22.portfolio.dto.request.ContactRequestDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -14,27 +11,22 @@ public class ContactService {
 
     private static final String SUBJECT_PREFIX = "[Portfolio] Mensagem de ";
 
-    private final JavaMailSender mailSender;
+    private final ResendService resendService;
     private final String recipientEmail;
-    private final String senderEmail;
 
-    public ContactService(JavaMailSender mailSender, PortfolioProperties portfolioProperties,
-                          @Value("${spring.mail.username}") String senderEmail) {
-        this.mailSender = mailSender;
+    public ContactService(ResendService resendService, PortfolioProperties portfolioProperties) {
+        this.resendService = resendService;
         this.recipientEmail = portfolioProperties.contact().recipientEmail();
-        this.senderEmail = senderEmail;
     }
 
     public void sendMessage(ContactRequestDto request) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(senderEmail);
-        message.setTo(recipientEmail);
-        message.setReplyTo(request.email());
-        message.setSubject(SUBJECT_PREFIX + request.name());
-        message.setText(buildBody(request));
-
         log.info("Sending contact message from {} <{}>", request.name(), request.email());
-        mailSender.send(message);
+        resendService.sendEmail(
+                recipientEmail,
+                request.email(),
+                SUBJECT_PREFIX + request.name(),
+                buildBody(request)
+        );
     }
 
     private String buildBody(ContactRequestDto request) {
