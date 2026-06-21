@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useProfile } from '@/hooks/useProfile'
 import RevealText from '@/components/ui/RevealText'
