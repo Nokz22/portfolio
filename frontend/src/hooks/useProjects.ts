@@ -12,7 +12,7 @@ export function useProjects() {
     setIsLoading(true)
     setError(null)
     api
-      .get<GithubRepoDto[]>('/api/v1/projects')
+      .get<GithubRepoDto[]>('/api/v1/projects/featured')
       .then(setData)
       .catch(() => {
         setData(STATIC_PROJECTS)
