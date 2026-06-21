@@ -4,7 +4,9 @@
 
 [![CI](https://github.com/Nokz22/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/Nokz22/portfolio/actions/workflows/ci.yml)
 
-**Live:** https://nunoferreira.dev &nbsp;·&nbsp; [LinkedIn](https://www.linkedin.com/in/nuno-ferreira-a02552203/) &nbsp;·&nbsp; [GitHub](https://github.com/Nokz22)
+## 🔗 [portfolio-orcin-omega-47.vercel.app](https://portfolio-orcin-omega-47.vercel.app)
+
+**Live:** https://portfolio-orcin-omega-47.vercel.app &nbsp;·&nbsp; [LinkedIn](https://www.linkedin.com/in/nuno-ferreira-a02552203/) &nbsp;·&nbsp; [GitHub](https://github.com/Nokz22)
 
 ---
 
@@ -18,7 +20,7 @@
 | Cache | Caffeine (GitHub API, 15 min TTL) |
 | i18n | react-i18next (PT-PT primary, EN secondary) |
 | Fonts | @fontsource-variable (self-hosted, no Google Fonts CDN) |
-| Infra | Docker multi-stage · GitHub Actions CI/CD · Railway |
+| Infra | Docker multi-stage · GitHub Actions CI · Render (backend) · Vercel (frontend) |
 
 ## Architecture
 
@@ -103,44 +105,34 @@ docker compose -f docker-compose.prod.yml up --build
 
 ---
 
-## Deployment (Railway)
+## Deployment (Render + Vercel)
 
-### First deploy
+### Backend — Render (Docker, Free tier)
 
-1. Create a [Railway](https://railway.app) account and a new project
-2. Add two services: `portfolio-frontend` and `portfolio-backend`
-3. Point each service to this repo with the correct root directory (`frontend/` and `backend/`)
-4. Set environment variables in the Railway dashboard (see `.env.example`)
-5. Generate a Railway API token and add it as a GitHub secret named `RAILWAY_TOKEN`
-6. Push to `main` — GitHub Actions deploys automatically
+1. Create a [Render](https://render.com) account → **New Web Service**
+2. Connect `Nokz22/portfolio`, set **Root Directory** to `backend`, **Language** to `Docker`
+3. Set environment variables in the Render dashboard:
 
-### Environment variables (Railway dashboard)
-
-**Backend service:**
 ```
 GITHUB_USERNAME=Nokz22
 GITHUB_TOKEN=ghp_...
 MAIL_USERNAME=your@gmail.com
 MAIL_PASSWORD=app_password_16chars
 CONTACT_RECIPIENT_EMAIL=your@gmail.com
-CORS_ALLOWED_ORIGINS=https://your-frontend.railway.app
+CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
 ```
 
-**Frontend service (build argument):**
+### Frontend — Vercel (Free tier)
+
+1. Create a [Vercel](https://vercel.com) account → **Add New Project**
+2. Import `Nokz22/portfolio`, set **Root Directory** to `frontend`
+3. Set environment variable:
+
 ```
-VITE_API_URL=https://your-backend.railway.app
+VITE_API_URL=https://your-backend.onrender.com
 ```
 
-### CI/CD pipeline
-
-```
-Push to main
-    │
-    ├── ci.yml  → lint → typecheck → test → build (both services)
-    │
-    └── deploy.yml (on ci pass) → railway up --service portfolio-backend
-                                → railway up --service portfolio-frontend
-```
+> **Note:** Free Render instances spin down after inactivity — first request after idle may take ~50 seconds.
 
 ---
 
