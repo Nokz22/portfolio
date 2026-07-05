@@ -57,7 +57,9 @@
     "github": "Source",
     "stars": "stars",
     "loading": "Loading projects...",
-    "error": "Could not load projects"
+    "error": "Could not load projects",
+    "github_profile": "See more on GitHub",
+    "github_profile_sub": "Repositories, activity and contributions"
   },
   "contact": {
     "title": "Contact",

@@ -13,7 +13,7 @@ export function useProjects() {
     setError(null)
     api
       .get<GithubRepoDto[]>('/api/v1/projects/featured')
-      .then(setData)
+      .then(data => setData(data.length > 0 ? data : STATIC_PROJECTS))
       .catch(() => {
         setData(STATIC_PROJECTS)
         setError(null)

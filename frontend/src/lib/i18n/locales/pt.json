@@ -57,7 +57,9 @@
     "github": "Código",
     "stars": "estrelas",
     "loading": "A carregar projectos...",
-    "error": "Não foi possível carregar os projectos"
+    "error": "Não foi possível carregar os projectos",
+    "github_profile": "Ver mais no GitHub",
+    "github_profile_sub": "Repositórios, actividade e contribuições"
   },
   "contact": {
     "title": "Contacto",

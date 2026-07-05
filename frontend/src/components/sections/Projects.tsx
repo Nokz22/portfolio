@@ -123,27 +123,34 @@ function RepoCard({ repo, index }: { repo: GithubRepoDto; index: number }) {
   )
 }
 
-function GitHubStatsCard() {
+function GitHubProfileCard() {
+  const { t } = useTranslation()
+
   return (
     <motion.div
-      className="col-span-full mt-4 p-6 bg-ink-950 rounded-xl border border-ink-800 flex flex-col sm:flex-row gap-6 items-center"
+      className="col-span-full mt-4 p-6 bg-ink-950 rounded-xl border border-ink-800 flex flex-col sm:flex-row gap-6 items-center justify-between"
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, ease: EASE, delay: 0.25 }}
     >
-      <div className="flex-1 min-w-0">
-        <img
-          src="https://github-readme-stats.vercel.app/api?username=Nokz22&show_icons=true&theme=dark&bg_color=0f0f12&title_color=E07B00&icon_color=E07B00&text_color=a0a0b0&border_color=2a2a2f&count_private=true"
-          alt="GitHub Stats" className="w-full max-w-md rounded-lg" loading="lazy"
-        />
+      <div className="flex flex-col gap-1">
+        <p className="text-ink-100 font-display font-semibold text-lg">{t('projects.github_profile')}</p>
+        <p className="text-ink-400 text-sm">{t('projects.github_profile_sub')}</p>
       </div>
-      <div className="flex-1 min-w-0">
-        <img
-          src="https://github-readme-stats.vercel.app/api/top-langs/?username=Nokz22&layout=compact&theme=dark&bg_color=0f0f12&title_color=E07B00&text_color=a0a0b0&border_color=2a2a2f"
-          alt="Top Languages" className="w-full max-w-md rounded-lg" loading="lazy"
-        />
-      </div>
+      <motion.a
+        href="https://github.com/Nokz22"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="pointer"
+        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-lg bg-ink-800 hover:bg-accent text-ink-100 font-medium text-sm transition-colors duration-200 shrink-0"
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+      >
+        <GitHubIcon />
+        github.com/Nokz22
+      </motion.a>
     </motion.div>
   )
 }
@@ -183,7 +190,7 @@ export default function Projects() {
             {repos.slice(0, 4).map((repo, i) => (
               <RepoCard key={repo.id} repo={repo} index={i} />
             ))}
-            <GitHubStatsCard />
+            <GitHubProfileCard />
           </div>
         )}
       </div>
