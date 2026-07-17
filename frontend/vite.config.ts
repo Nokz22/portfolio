@@ -46,6 +46,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test-setup.ts',
+    // No test files exist yet — don't fail CI on an empty suite.
+    passWithNoTests: true,
     coverage: {
       reporter: ['text', 'lcov'],
     },
