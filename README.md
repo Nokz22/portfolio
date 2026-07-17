@@ -15,7 +15,7 @@
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 18 · TypeScript strict · Vite · Tailwind CSS |
-| Animation | GSAP · Lenis · Framer Motion · OGL (WebGL shader) |
+| Animation | GSAP · Lenis · Framer Motion |
 | Backend | Spring Boot 3 · Java 17 · REST API v1 |
 | Cache | Caffeine (GitHub API, 15 min TTL) |
 | i18n | react-i18next (PT-PT primary, EN secondary) |
@@ -145,8 +145,7 @@ portfolio/
 │   │   ├── components/
 │   │   │   ├── layout/          # Navbar, Footer
 │   │   │   ├── sections/        # Hero, About, Experience, Skills, Projects, Contact
-│   │   │   ├── ui/              # CustomCursor, SkeletonLoader, LanguageToggle, SkipToContent
-│   │   │   └── webgl/           # ForgeShader (OGL)
+│   │   │   └── ui/              # CustomCursor, SkeletonLoader, LanguageToggle, SkipToContent
 │   │   ├── hooks/               # useProfile, useExperience, useSkills, useProjects, useContactForm
 │   │   ├── lib/                 # api client · i18n · motion tokens
 │   │   ├── pages/               # Home, ProjectDetail, NotFound (lazy-loaded)
@@ -198,9 +197,8 @@ portfolio/
 | 003 | Frontend build | Vite + React Router | No SSR needed; leaner than Next.js; pure React |
 | 004 | Content storage | JSON files + repository interface | Zero DB complexity in Phase 1; abstraction enables PostgreSQL migration without touching controllers/services |
 | 005 | Animation | GSAP + Framer Motion + Lenis | GSAP for cursor/scroll; Framer Motion for page transitions; Lenis for smooth scroll momentum |
-| 006 | WebGL | OGL (~8 KB) | Single shader doesn't justify Three.js (~600 KB) — stays within 150 KB bundle budget |
 | 007 | i18n | react-i18next | Industry standard; LanguageDetector + JSON files; hooks re-render on lang change |
-| 008 | Bundle chunks | manualChunks (Vite) | vendor-motion, vendor-scroll, vendor-webgl as separate lazy chunks |
+| 008 | Bundle chunks | manualChunks (Vite) | vendor-motion, vendor-scroll as separate lazy chunks |
 | 009 | Contact anti-spam | Honeypot + Bucket4j rate limit | No CAPTCHA UX friction; honeypot silent-fails bots; 5 req/h per IP prevents flooding |
 | 010 | Rate limiting | Bucket4j in-process | Redis would be overkill at this traffic level; ConcurrentHashMap is thread-safe |
 | 011 | Fonts | @fontsource-variable (self-hosted) | Eliminates Google Fonts CDN dependency, DNS lookup, and render-blocking; WOFF2 served from same origin |
