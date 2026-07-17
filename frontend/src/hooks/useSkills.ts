@@ -18,7 +18,7 @@ export function useSkills() {
         setData(STATIC_SKILLS)
         setError(null)
       })
-      .finally(() => setIsLoading(false))
+      .finally(() => { setIsLoading(false) })
   }, [])
 
   return { data, isLoading, error }

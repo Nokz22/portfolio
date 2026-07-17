@@ -16,10 +16,10 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
+    const onScroll = () => { setScrolled(window.scrollY > 40) }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => { window.removeEventListener('scroll', onScroll) }
   }, [])
 
   function scrollTo(id: string) {
@@ -39,7 +39,7 @@ export default function Navbar() {
         <div className="max-w-content mx-auto px-6 h-16 flex items-center justify-between">
           {/* Monogram */}
           <button
-            onClick={() => scrollTo('hero')}
+            onClick={() => { scrollTo('hero') }}
             className="font-display font-bold text-accent text-xl leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Go to top"
           >
@@ -51,7 +51,7 @@ export default function Navbar() {
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
-                onClick={() => scrollTo(item.id)}
+                onClick={() => { scrollTo(item.id) }}
                 className={`text-label-lg font-medium transition-colors duration-fast hover:text-accent ${
                   scrolled ? 'text-ink-600' : 'text-white/80'
                 }`}
@@ -69,7 +69,7 @@ export default function Navbar() {
 
             {/* Hamburger — morphs into an X when the overlay is open */}
             <button
-              onClick={() => setMenuOpen((v) => !v)}
+              onClick={() => { setMenuOpen((v) => !v) }}
               className="md:hidden relative z-50 p-2 rounded-lg"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
@@ -105,7 +105,7 @@ export default function Navbar() {
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
-              onClick={() => scrollTo(item.id)}
+              onClick={() => { scrollTo(item.id) }}
               className="text-display-sm text-white font-display font-semibold hover:text-accent transition-colors duration-fast"
             >
               {t(item.key)}

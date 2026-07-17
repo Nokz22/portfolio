@@ -63,7 +63,7 @@ function useTypewriter(phrases: string[], typingSpeed = 65, deletingSpeed = 35, 
     let timer: ReturnType<typeof setTimeout>
 
     if (!deleting && displayed === phrase) {
-      timer = setTimeout(() => setDeleting(true), pauseMs)
+      timer = setTimeout(() => { setDeleting(true) }, pauseMs)
     } else if (deleting && displayed === '') {
       setDeleting(false)
       setIdx((i) => (i + 1) % phrases.length)
@@ -75,7 +75,7 @@ function useTypewriter(phrases: string[], typingSpeed = 65, deletingSpeed = 35, 
         )
       }, deleting ? deletingSpeed : typingSpeed)
     }
-    return () => clearTimeout(timer)
+    return () => { clearTimeout(timer) }
   }, [displayed, deleting, idx, phrases, typingSpeed, deletingSpeed, pauseMs])
 
   return displayed
@@ -126,8 +126,8 @@ function ScrollIndicator() {
 function useDelayedFlag(ms: number) {
   const [flag, setFlag] = useState(false)
   useEffect(() => {
-    const t = setTimeout(() => setFlag(true), ms)
-    return () => clearTimeout(t)
+    const t = setTimeout(() => { setFlag(true) }, ms)
+    return () => { clearTimeout(t) }
   }, [ms])
   return flag
 }

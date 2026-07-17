@@ -140,7 +140,7 @@ export default function Contact() {
 
           {/* Right: form */}
           <motion.div {...reveal(0.2)}>
-            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+            <form onSubmit={(e) => { void handleSubmit(e) }} noValidate className="flex flex-col gap-4">
               <div className="hidden" aria-hidden="true">
                 <label htmlFor="website">Website</label>
                 <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
@@ -154,7 +154,7 @@ export default function Contact() {
                   <label htmlFor={id} className="block text-sm font-semibold text-ink-600 mb-1.5">{label}</label>
                   <input
                     id={id} type={type} value={value}
-                    onChange={(e) => setter(e.target.value)}
+                    onChange={(e) => { setter(e.target.value) }}
                     className={INPUT_CLASS} required autoComplete={autoComplete}
                     disabled={status === 'sending' || status === 'success'}
                   />
@@ -167,7 +167,7 @@ export default function Contact() {
                 </label>
                 <textarea
                   id="contact-message" value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => { setMessage(e.target.value) }}
                   rows={6} className={INPUT_CLASS + ' resize-none'} required
                   disabled={status === 'sending' || status === 'success'}
                 />

@@ -7,7 +7,7 @@ export class HttpError extends Error {
     public readonly status: number,
     public readonly problem: ProblemDetail | null,
   ) {
-    super(problem?.detail ?? `HTTP ${status}`)
+    super(problem?.detail ?? `HTTP ${String(status)}`)
     this.name = 'HttpError'
   }
 }

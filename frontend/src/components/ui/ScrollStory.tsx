@@ -4,7 +4,7 @@ import {
   useScroll,
   useTransform,
   useReducedMotion,
-  MotionValue,
+  type MotionValue,
 } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import AmbientOrbs from '@/components/ui/AmbientOrbs'
@@ -97,6 +97,18 @@ function ProgressBar({ progress }: { progress: MotionValue<number> }) {
 }
 
 // ─── Dot navigation ────────────────────────────────────────────────────────────
+// Each dot is its own component so useTransform is called at a stable hook
+// position, rather than inside the .map() callback in DotNav.
+function Dot({ index, count, progress }: { index: number; count: number; progress: MotionValue<number> }) {
+  const center = (index + 0.5) / count
+  const opacity = useTransform(
+    progress,
+    [center - 0.4 / count, center, center + 0.4 / count],
+    [0.25, 1, 0.25],
+  )
+  return <motion.span style={{ opacity }} className="w-1.5 h-1.5 rounded-full bg-white block" />
+}
+
 function DotNav({
   count,
   progress,
@@ -106,21 +118,9 @@ function DotNav({
 }) {
   return (
     <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-      {Array.from({ length: count }).map((_, i) => {
-        const center = (i + 0.5) / count
-        const opacity = useTransform(
-          progress,
-          [center - 0.4 / count, center, center + 0.4 / count],
-          [0.25, 1, 0.25],
-        )
-        return (
-          <motion.span
-            key={i}
-            style={{ opacity }}
-            className="w-1.5 h-1.5 rounded-full bg-white block"
-          />
-        )
-      })}
+      {Array.from({ length: count }).map((_, i) => (
+        <Dot key={i} index={i} count={count} progress={progress} />
+      ))}
     </div>
   )
 }
@@ -135,6 +135,9 @@ export default function ScrollStory() {
     target: containerRef,
     offset: ['start start', 'end end'],
   })
+  // Hooks must run unconditionally — computed here, before the reduced-motion
+  // early return below, even though it's only rendered in the non-reduced path.
+  const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0])
 
   const isPT = i18n.language.startsWith('pt')
 
@@ -194,7 +197,7 @@ export default function ScrollStory() {
     // Container is taller than viewport — gives scroll room for the pinned inner
     <div
       ref={containerRef}
-      style={{ height: `${(n + 1) * 100}vh` }}
+      style={{ height: `${String((n + 1) * 100)}vh` }}
       aria-label="Stack showcase"
     >
       {/* Sticky viewport — stays pinned while user scrolls through the container */}
@@ -227,9 +230,7 @@ export default function ScrollStory() {
         {/* Scroll hint — fades out quickly */}
         <motion.p
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/30 text-xs tracking-widest uppercase"
-          style={{
-            opacity: useTransform(scrollYProgress, [0, 0.08], [1, 0]),
-          }}
+          style={{ opacity: scrollHintOpacity }}
           aria-hidden="true"
         >
           scroll

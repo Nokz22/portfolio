@@ -21,7 +21,7 @@ export function useExperience() {
         setData(STATIC_EXPERIENCE[lang])
         setError(null)
       })
-      .finally(() => setIsLoading(false))
+      .finally(() => { setIsLoading(false) })
   }, [i18n.language])
 
   return { data, isLoading, error }
