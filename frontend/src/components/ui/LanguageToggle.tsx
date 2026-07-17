@@ -10,7 +10,7 @@ export function LanguageToggle() {
   return (
     <div className="flex items-center gap-1" role="group" aria-label="Language selector">
       <button
-        onClick={() => switchTo('pt')}
+        onClick={() => { switchTo('pt') }}
         className={`text-label-lg px-2 py-0.5 rounded transition-colors duration-fast ${
           i18n.language === 'pt'
             ? 'text-accent font-semibold'
@@ -23,7 +23,7 @@ export function LanguageToggle() {
       </button>
       <span className="text-ink-300 select-none" aria-hidden="true">|</span>
       <button
-        onClick={() => switchTo('en')}
+        onClick={() => { switchTo('en') }}
         className={`text-label-lg px-2 py-0.5 rounded transition-colors duration-fast ${
           i18n.language === 'en'
             ? 'text-accent font-semibold'

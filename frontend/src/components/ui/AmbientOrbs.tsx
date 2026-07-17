@@ -18,7 +18,7 @@ export default function AmbientOrbs({ intensity = 1 }: Props) {
           width: '60vw', height: '60vw',
           top: 'calc(25% - 30vw)', left: 'calc(20% - 30vw)',
           borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(224,123,0,${0.35 * o}) 0%, rgba(180,80,0,${0.12 * o}) 45%, transparent 70%)`,
+          background: `radial-gradient(circle, rgba(224,123,0,${String(0.35 * o)}) 0%, rgba(180,80,0,${String(0.12 * o)}) 45%, transparent 70%)`,
           filter: 'blur(68px)',
         }}
         animate={{
@@ -35,7 +35,7 @@ export default function AmbientOrbs({ intensity = 1 }: Props) {
           width: '50vw', height: '50vw',
           top: 'calc(75% - 25vw)', left: 'calc(80% - 25vw)',
           borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(200,100,0,${0.28 * o}) 0%, rgba(224,123,0,${0.08 * o}) 50%, transparent 70%)`,
+          background: `radial-gradient(circle, rgba(200,100,0,${String(0.28 * o)}) 0%, rgba(224,123,0,${String(0.08 * o)}) 50%, transparent 70%)`,
           filter: 'blur(85px)',
         }}
         animate={{
@@ -52,7 +52,7 @@ export default function AmbientOrbs({ intensity = 1 }: Props) {
           width: '32vw', height: '32vw',
           top: 'calc(50% - 16vw)', left: 'calc(55% - 16vw)',
           borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(255,145,10,${0.20 * o}) 0%, transparent 70%)`,
+          background: `radial-gradient(circle, rgba(255,145,10,${String(0.20 * o)}) 0%, transparent 70%)`,
           filter: 'blur(52px)',
         }}
         animate={{

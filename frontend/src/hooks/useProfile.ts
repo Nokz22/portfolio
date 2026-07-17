@@ -21,7 +21,7 @@ export function useProfile() {
         setData(STATIC_PROFILE[lang])
         setError(null)
       })
-      .finally(() => setIsLoading(false))
+      .finally(() => { setIsLoading(false) })
   }, [i18n.language])
 
   return { data, isLoading, error }

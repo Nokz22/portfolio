@@ -28,7 +28,7 @@ function AnimatedNumber({ value, suffix = '', prefix = '', inView }: { value: nu
     const controls = animate(0, value, {
       duration: 1.6,
       ease: 'easeOut',
-      onUpdate: (v) => setDisplay(Math.round(v)),
+      onUpdate: (v) => { setDisplay(Math.round(v)) },
     })
     return controls.stop
   }, [inView, value])
@@ -57,7 +57,7 @@ function StatCard({ stat, index }: { stat: Stat; index: number }) {
       <p
         className="font-display font-bold text-ink-950 tabular-nums leading-none"
         style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)' }}
-        aria-label={`${stat.value}${stat.suffix ?? ''} ${t(stat.labelKey)}`}
+        aria-label={`${String(stat.value)}${stat.suffix ?? ''} ${t(stat.labelKey)}`}
       >
         <AnimatedNumber value={stat.value} suffix={stat.suffix ?? ''} prefix={stat.prefix ?? ''} inView={inView} />
       </p>

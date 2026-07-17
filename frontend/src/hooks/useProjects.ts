@@ -13,12 +13,12 @@ export function useProjects() {
     setError(null)
     api
       .get<GithubRepoDto[]>('/api/v1/projects/featured')
-      .then(data => setData(data.length > 0 ? data : STATIC_PROJECTS))
+      .then(data => { setData(data.length > 0 ? data : STATIC_PROJECTS) })
       .catch(() => {
         setData(STATIC_PROJECTS)
         setError(null)
       })
-      .finally(() => setIsLoading(false))
+      .finally(() => { setIsLoading(false) })
   }, [])
 
   return { data, isLoading, error }

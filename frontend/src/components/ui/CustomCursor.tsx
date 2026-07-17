@@ -39,7 +39,7 @@ export default function CustomCursor() {
 
     const onEnter = (e: Event) => {
       const t = e.target as Element
-      if (t.closest('[data-cursor="pointer"]') || t.closest('a') || t.closest('button')) {
+      if (t.closest('[data-cursor="pointer"]') ?? t.closest('a') ?? t.closest('button')) {
         gsap.to(ring, { scale: 1.6, duration: 0.3, ease: 'power2.out' })
         gsap.to(dot, { opacity: 0, duration: 0.2 })
       }
@@ -47,7 +47,7 @@ export default function CustomCursor() {
 
     const onLeave = (e: Event) => {
       const t = e.target as Element
-      if (t.closest('[data-cursor="pointer"]') || t.closest('a') || t.closest('button')) {
+      if (t.closest('[data-cursor="pointer"]') ?? t.closest('a') ?? t.closest('button')) {
         gsap.to(ring, { scale: 1, duration: 0.3, ease: 'power2.out' })
         gsap.to(dot, { opacity: 1, duration: 0.2 })
       }

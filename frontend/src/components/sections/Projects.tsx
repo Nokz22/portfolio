@@ -43,7 +43,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div ref={ref} onMouseMove={onMouseMove} onMouseLeave={() => setTilt({ x: 0, y: 0 })}
+    <div ref={ref} onMouseMove={onMouseMove} onMouseLeave={() => { setTilt({ x: 0, y: 0 }) }}
       style={{ perspective: 900 }} className="h-full"
     >
       <motion.div
@@ -110,7 +110,7 @@ function RepoCard({ repo, index }: { repo: GithubRepoDto; index: number }) {
               </>
             )}
           </div>
-          <span className="flex items-center gap-1" aria-label={`${repo.stars} ${t('projects.stars')}`}>
+          <span className="flex items-center gap-1" aria-label={`${String(repo.stars)} ${t('projects.stars')}`}>
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
