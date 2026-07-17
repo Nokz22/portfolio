@@ -50,24 +50,18 @@ function CodeToken({ text, left, top, size, opacity, factor, amber, scrollY }: T
 
 // ── Typewriter ────────────────────────────────────────────────────────────────
 
+// Seeds `displayed` with phrases[0] so the handoff from RevealText is
+// invisible — the cycle only starts deleting/typing once pauseMs elapses.
 function useTypewriter(phrases: string[], typingSpeed = 65, deletingSpeed = 35, pauseMs = 2200) {
   const [idx, setIdx] = useState(0)
-  const [displayed, setDisplayed] = useState('')
+  const [displayed, setDisplayed] = useState(phrases[0] ?? '')
   const [deleting, setDeleting] = useState(false)
-  const [started, setStarted] = useState(false)
-
-  // Start typewriter after initial RevealText animations finish
-  useEffect(() => {
-    const t = setTimeout(() => setStarted(true), 2800)
-    return () => clearTimeout(t)
-  }, [])
 
   useEffect(() => {
-    if (!started) return
     const phrase = phrases[idx]
+    if (!phrase) return
     let timer: ReturnType<typeof setTimeout>
 
-    if (!phrase) return
     if (!deleting && displayed === phrase) {
       timer = setTimeout(() => setDeleting(true), pauseMs)
     } else if (deleting && displayed === '') {
@@ -82,15 +76,13 @@ function useTypewriter(phrases: string[], typingSpeed = 65, deletingSpeed = 35, 
       }, deleting ? deletingSpeed : typingSpeed)
     }
     return () => clearTimeout(timer)
-  }, [displayed, deleting, idx, phrases, typingSpeed, deletingSpeed, pauseMs, started])
+  }, [displayed, deleting, idx, phrases, typingSpeed, deletingSpeed, pauseMs])
 
-  return { displayed, started }
+  return displayed
 }
 
 function TypewriterTitle({ phrases }: { phrases: string[] }) {
-  const { displayed, started } = useTypewriter(phrases)
-
-  if (!started) return null
+  const displayed = useTypewriter(phrases)
 
   return (
     <span className="inline-flex items-center gap-0.5">
@@ -129,12 +121,24 @@ function ScrollIndicator() {
 }
 
 
+// Flips to true once, `ms` after mount — used to hand the title off from
+// RevealText to TypewriterTitle after the entrance animation has settled.
+function useDelayedFlag(ms: number) {
+  const [flag, setFlag] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setFlag(true), ms)
+    return () => clearTimeout(t)
+  }, [ms])
+  return flag
+}
+
 // ── Hero ──────────────────────────────────────────────────────────────────────
 
 export default function Hero() {
   const { t } = useTranslation()
   const { data: profile } = useProfile()
   const sectionRef = useRef<HTMLElement>(null)
+  const typewriterActive = useDelayedFlag(2800)
 
   const { scrollY } = useScroll()
   const { scrollYProgress } = useScroll({
@@ -146,9 +150,14 @@ export default function Hero() {
   const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '12%'])
   const tokensY  = useTransform(scrollYProgress, [0, 1], ['0%', '6%'])
 
-  const name    = profile?.name  ?? 'Nuno Ferreira'
-  const title   = profile?.title ?? 'Junior Software Developer'
-  const phrases = t('hero.phrases', { returnObjects: true }) as string[]
+  const name       = profile?.name  ?? 'Nuno Ferreira'
+  const title      = profile?.title ?? 'Junior Software Developer'
+  const rawPhrases = t('hero.phrases', { returnObjects: true }) as string[]
+  // Guarantee the cycle's first phrase matches the revealed title exactly,
+  // so the RevealText → TypewriterTitle handoff never visibly jumps.
+  const phrases = Array.isArray(rawPhrases) && rawPhrases.length > 0
+    ? [title, ...rawPhrases.filter((p) => p !== title)]
+    : [title]
 
   return (
     <section
@@ -196,13 +205,9 @@ export default function Hero() {
 
           {/* Title — reveals once, then typewriter takes over */}
           <div className="font-display font-medium text-white/55 min-h-[2.2rem]" style={{ fontSize: 'clamp(1.1rem, 3vw, 1.85rem)' }}>
-            <motion.span
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-            >
-              <RevealText text={title} by="word" delay={0.82} trigger="mount" />
-            </motion.span>
-            <TypewriterTitle phrases={Array.isArray(phrases) ? phrases : [title]} />
+            {typewriterActive
+              ? <TypewriterTitle phrases={phrases} />
+              : <RevealText text={title} by="word" delay={0.82} trigger="mount" />}
           </div>
 
           {/* Location */}

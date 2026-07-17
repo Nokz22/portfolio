@@ -23,8 +23,6 @@ export default defineConfig({
           'vendor-motion': ['framer-motion'],
           // Scroll animations — lazy loaded by ScrollReveal component
           'vendor-scroll': ['gsap', 'lenis'],
-          // WebGL shader — lazy loaded by ForgeShader component
-          'vendor-webgl': ['ogl'],
           // i18n — lazy loaded per locale
           'vendor-i18n': ['react-i18next', 'i18next', 'i18next-browser-languagedetector'],
         },

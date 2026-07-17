@@ -67,16 +67,28 @@ export default function Navbar() {
               <LanguageToggle />
             </div>
 
-            {/* Hamburger */}
+            {/* Hamburger — morphs into an X when the overlay is open */}
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="md:hidden p-2 rounded-lg"
+              className="md:hidden relative z-50 p-2 rounded-lg"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
             >
-              <span className="block w-5 h-0.5 bg-current mb-1 transition-all duration-fast" />
-              <span className="block w-5 h-0.5 bg-current mb-1 transition-all duration-fast" />
-              <span className="block w-5 h-0.5 bg-current transition-all duration-fast" />
+              <span
+                className={`block w-5 h-0.5 bg-current transition-all duration-fast ease-out-cubic ${
+                  menuOpen ? 'rotate-45 translate-y-[5px]' : 'mb-1.5'
+                }`}
+              />
+              <span
+                className={`block w-5 h-0.5 bg-current transition-all duration-fast ease-out-cubic ${
+                  menuOpen ? 'opacity-0' : 'mb-1.5'
+                }`}
+              />
+              <span
+                className={`block w-5 h-0.5 bg-current transition-all duration-fast ease-out-cubic ${
+                  menuOpen ? '-rotate-45 -translate-y-[5px]' : ''
+                }`}
+              />
             </button>
           </div>
         </div>
@@ -90,13 +102,6 @@ export default function Navbar() {
           aria-modal="true"
           aria-label="Navigation menu"
         >
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="absolute top-5 right-6 text-white/60 hover:text-white text-2xl"
-            aria-label="Close menu"
-          >
-            ✕
-          </button>
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
