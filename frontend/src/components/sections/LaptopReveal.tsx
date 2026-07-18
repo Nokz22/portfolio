@@ -27,16 +27,17 @@ const LINES = [
   { txt: 'nuno@portfolio:~$ █', cls: 'text-amber-400' },
 ]
 
-// Small key block for the keyboard grid
+// Small key block for the keyboard grid — light aluminum keycap
 function Key({ flex = 1 }: { flex?: number }) {
   return (
     <div
       style={{
         flex,
         height: 'clamp(10px, 1.8vw, 18px)',
-        background: '#252532',
+        background: '#f2f3f5',
         borderRadius: 3,
-        boxShadow: '0 1px 0 rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
+        border: '1px solid rgba(0,0,0,0.08)',
+        boxShadow: '0 1px 0 rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)',
       }}
     />
   )
@@ -122,25 +123,22 @@ export default function LaptopReveal() {
         <motion.div style={{ opacity: laptopOpacity }} className="flex flex-col items-center w-full px-4">
           <div style={{ width: 'min(92vw, 640px)' }}>
 
-            {/* Screen housing */}
+            {/* Screen housing — light aluminum, like a real MacBook lid */}
             <div ref={screenBoxRef} style={{ paddingLeft: '3%', paddingRight: '3%' }}>
               <div style={{
-                background: 'linear-gradient(180deg, #242432 0%, #1e1e2a 100%)',
-                borderRadius: '14px 14px 0 0',
-                padding: '10px 10px 0',
-                boxShadow: '0 -6px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)',
+                background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
+                borderRadius: '16px 16px 0 0',
+                padding: '9px 9px 0',
+                boxShadow: '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
               }}>
                 {/* Camera notch */}
                 <div style={{
-                  height: 10,
-                  background: '#14141c',
-                  borderRadius: '5px 5px 0 0',
-                  marginBottom: 4,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  marginBottom: 3,
                 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#0a0a12' }} />
+                  <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
                 </div>
 
                 {/* Screen — height animated for lid-opening effect */}
@@ -149,7 +147,7 @@ export default function LaptopReveal() {
                     height: screenH,
                     overflow: 'hidden',
                     background: '#08080d',
-                    borderRadius: '3px 3px 0 0',
+                    borderRadius: '6px 6px 0 0',
                     perspective: '700px',
                   }}
                 >
@@ -199,19 +197,19 @@ export default function LaptopReveal() {
               </div>
             </div>
 
-            {/* Hinge */}
+            {/* Hinge — thin recessed line where lid meets the deck */}
             <div style={{
-              height: 12,
-              background: 'linear-gradient(180deg, #0e0e16 0%, #181820 100%)',
-              boxShadow: '0 3px 12px rgba(0,0,0,0.9)',
+              height: 4,
+              background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
             }} />
 
-            {/* Keyboard base */}
+            {/* Keyboard base — light aluminum deck */}
             <div style={{
-              background: 'linear-gradient(180deg, #1e1e2a 0%, #1c1c26 100%)',
-              borderRadius: '0 0 10px 10px',
+              background: 'linear-gradient(180deg, #e8eaed 0%, #d2d5da 100%)',
+              borderRadius: '0 0 16px 16px',
               padding: '12px 18px 8px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.03)',
+              boxShadow: '0 14px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.7)',
             }}>
               {/* Function row */}
               <div style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
@@ -233,21 +231,33 @@ export default function LaptopReveal() {
               <div style={{
                 width: '36%',
                 height: 'clamp(34px, 4.5vw, 56px)',
-                background: '#1a1a24',
+                background: '#dde0e4',
                 borderRadius: 6,
                 margin: '0 auto 4px',
-                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.04)',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.6)',
+                border: '1px solid rgba(0,0,0,0.08)',
               }} />
             </div>
 
             {/* Bottom rim */}
             <div style={{
-              height: 6,
-              background: '#111118',
-              borderRadius: '0 0 4px 4px',
-              boxShadow: '0 6px 24px rgba(0,0,0,0.95)',
+              height: 5,
+              background: 'linear-gradient(180deg, #d2d5da 0%, #b8bbc1 100%)',
+              borderRadius: '0 0 6px 6px',
+              boxShadow: '0 10px 28px rgba(0,0,0,0.55)',
             }} />
+
+            {/* Ground shadow — sells the laptop as sitting in the scene */}
+            <motion.div
+              aria-hidden="true"
+              style={{
+                opacity: laptopOpacity,
+                width: '70%',
+                height: 'clamp(14px, 2.5vw, 24px)',
+                margin: '10px auto 0',
+                background: 'radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 72%)',
+              }}
+            />
 
           </div>
         </motion.div>
