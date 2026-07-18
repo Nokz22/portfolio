@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform, useReducedMotion, cubicBezier } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import AmbientOrbs from '@/components/ui/AmbientOrbs'
 
-// Real MacBook display ratio (~16:10.3). The screen box's height is derived
-// from its measured width so it never looks stretched at any viewport size.
-const SCREEN_ASPECT = 16 / 10.3
+// Real MacBook display ratio (~16:10.3) — CSS aspect-ratio keeps the screen
+// correctly proportioned at any width with no JS measurement needed.
+const SCREEN_ASPECT = '16 / 10.3'
 
-// Terminal lines shown when screen opens
+// A weighted, physical-feeling curve for the hinge: slow to start (as if
+// overcoming resistance), swings freely through the middle, settles softly
+// at fully open — never a linear scroll-locked rotation.
+const hingeEase = cubicBezier(0.65, 0, 0.35, 1)
+
+// Terminal lines shown once the screen powers on
 const LINES = [
   { txt: 'nuno@portfolio:~$ cat about.json', cls: 'text-amber-400' },
   { txt: '', cls: '' },
@@ -43,49 +48,184 @@ function Key({ flex = 1 }: { flex?: number }) {
   )
 }
 
+function TerminalContent() {
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12, alignItems: 'center' }}>
+        {['#ff5f57', '#febc2e', '#28c840'].map((c) => (
+          <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
+        ))}
+        <span
+          style={{
+            marginLeft: 8,
+            color: 'rgba(255,255,255,0.22)',
+            fontSize: 'clamp(8px, 1.1vw, 11px)',
+            fontFamily: 'ui-monospace,"Cascadia Code","Fira Code",Menlo,monospace',
+          }}
+        >
+          zsh — 80×24
+        </span>
+      </div>
+      <div
+        style={{
+          fontFamily: 'ui-monospace,"Cascadia Code","Fira Code",Menlo,monospace',
+          fontSize: 'clamp(8.5px, 1.35vw, 12.5px)',
+          lineHeight: 1.75,
+          color: 'rgba(255,255,255,0.78)',
+        }}
+      >
+        {LINES.map((line, i) => (
+          <div key={i} className={line.cls}>
+            {line.txt || ' '}
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+// Keyboard deck + trackpad — identical for both the animated and the
+// reduced-motion static variant.
+function KeyboardDeck() {
+  return (
+    <div
+      style={{
+        background: 'linear-gradient(180deg, #e8eaed 0%, #d2d5da 100%)',
+        borderRadius: '0 0 16px 16px',
+        padding: '12px 18px 8px',
+        boxShadow: '0 14px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.7)',
+      }}
+    >
+      <div style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
+        {Array.from({ length: 14 }).map((_, i) => (
+          <Key key={i} />
+        ))}
+      </div>
+      {[14, 14, 13, 11].map((count, row) => (
+        <div key={row} style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
+          {Array.from({ length: count }).map((_, i) => (
+            <Key key={i} flex={row === 3 && (i === 0 || i === count - 1) ? 1.8 : 1} />
+          ))}
+        </div>
+      ))}
+      <div style={{ display: 'flex', gap: 3, marginBottom: 8 }}>
+        {[1, 1, 4, 1, 1].map((flex, i) => (
+          <Key key={i} flex={flex} />
+        ))}
+      </div>
+      <div
+        style={{
+          width: '36%',
+          height: 'clamp(34px, 4.5vw, 56px)',
+          background: '#dde0e4',
+          borderRadius: 6,
+          margin: '0 auto 4px',
+          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.6)',
+          border: '1px solid rgba(0,0,0,0.08)',
+        }}
+      />
+    </div>
+  )
+}
+
+// Reduced-motion fallback — a static, fully open, screen-on laptop with no
+// scroll-jacking. Keeps the same visual language without forcing motion.
+function StaticLaptop() {
+  const { t } = useTranslation()
+  return (
+    <section className="relative bg-[#0c0c10] py-24 px-6 overflow-hidden" aria-label="MacBook">
+      <AmbientOrbs intensity={0.5} />
+      <div
+        className="relative z-10 mx-auto flex flex-col items-center"
+        style={{ width: 'min(92vw, 640px)' }}
+        aria-hidden="true"
+      >
+        <div style={{ paddingLeft: '3%', paddingRight: '3%' }}>
+          <div
+            style={{
+              background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
+              borderRadius: '16px 16px 0 0',
+              padding: '9px 9px 0',
+              boxShadow:
+                '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
+              <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
+            </div>
+            <div
+              style={{
+                aspectRatio: SCREEN_ASPECT,
+                overflow: 'hidden',
+                background: '#08080d',
+                borderRadius: '6px 6px 0 0',
+                padding: '14px 18px',
+              }}
+            >
+              <TerminalContent />
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            height: 4,
+            width: '100%',
+            background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
+          }}
+        />
+        <div style={{ width: '100%' }}>
+          <KeyboardDeck />
+        </div>
+      </div>
+      <p className="relative z-10 text-center text-white/40 text-sm mt-8">{t('laptop.open_env')}</p>
+    </section>
+  )
+}
+
 export default function LaptopReveal() {
   const { t } = useTranslation()
+  const reduced = useReducedMotion()
   const containerRef = useRef<HTMLDivElement>(null)
-  const screenBoxRef = useRef<HTMLDivElement>(null)
-  const [screenWidth, setScreenWidth] = useState(0)
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   })
 
-  // Measure the screen box's actual rendered width so its target height can
-  // be derived from a real aspect ratio instead of a fixed pixel value —
-  // a fixed height looked badly stretched on narrow (mobile) viewports.
-  useEffect(() => {
-    const el = screenBoxRef.current
-    if (!el) return
-    const update = () => { setScreenWidth(el.offsetWidth) }
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    return () => { ro.disconnect() }
-  }, [])
+  // Laptop fades in at the very start
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.06], [0, 1])
 
-  // screenWidth is the housing's outer width; subtract its own 10px+10px
-  // inner padding to get the actual screen box width the ratio applies to.
-  const screenTargetHeight = Math.max(screenWidth - 20, 0) / SCREEN_ASPECT
+  // Raw scroll fraction dedicated to the hinge, then eased for weight —
+  // this is what makes it feel like a real lid rather than a value slider.
+  const rawOpen = useTransform(scrollYProgress, [0.05, 0.6], [0, 1])
+  const easedOpen = useTransform(rawOpen, hingeEase)
+  const screenTilt = useTransform(easedOpen, [0, 1], [84, 0])
 
-  // Laptop fades in at the start
-  const laptopOpacity  = useTransform(scrollYProgress, [0, 0.10], [0, 1])
-  // Lid hinge rotation: starts nearly flat/closed (steep angle, foreshortened
-  // to a thin sliver by the perspective) and swings up to fully open (0deg,
-  // facing the viewer) — a single rigid rotation, like a real laptop lid.
-  const screenTilt     = useTransform(scrollYProgress, [0.06, 0.72], [84, 0])
-  // Terminal content appears only when screen is mostly open
-  const contentOpacity = useTransform(scrollYProgress, [0.5, 0.72], [0, 1])
-  // Ambient screen glow intensifies as screen opens
-  const glowOpacity    = useTransform(scrollYProgress, [0.3, 0.72], [0, 0.9])
-  // Label above laptop fades away as laptop opens
-  const labelOpacity   = useTransform(scrollYProgress, [0, 0.15, 0.30, 0.40], [1, 1, 0.5, 0])
-  const labelY         = useTransform(scrollYProgress, [0, 0.40], ['0px', '-36px'])
-  // Scroll hint
-  const hintOpacity    = useTransform(scrollYProgress, [0, 0.05, 0.88, 1.0], [0, 0.45, 0.45, 0])
+  // Glass reflection sweeping across the screen as it rotates — the cue
+  // that reads as "real material catching light," not a flat shape turning.
+  const sheenX = useTransform(easedOpen, [0, 1], ['-60%', '160%'])
+  const sheenOpacity = useTransform(easedOpen, [0, 0.45, 1], [0, 0.5, 0.08])
+
+  // Ambient occlusion in the hinge crease — deepest while closed, fading
+  // as the lid lifts clear of the deck.
+  const hingeShadowOpacity = useTransform(screenTilt, [84, 0], [0.85, 0.15])
+
+  // The screen "powers on" as a distinct beat once the lid has finished
+  // opening: a quick bright pulse, a lingering backlight, then — a moment
+  // later — the terminal content fades up.
+  const powerOnOpacity = useTransform(scrollYProgress, [0.58, 0.63, 0.68], [0, 1, 0])
+  const backlightOpacity = useTransform(scrollYProgress, [0.58, 0.66], [0, 1])
+  const contentOpacity = useTransform(scrollYProgress, [0.64, 0.78], [0, 1])
+  const contentY = useTransform(scrollYProgress, [0.64, 0.78], [8, 0])
+
+  const glowOpacity = useTransform(scrollYProgress, [0.4, 0.66], [0, 0.9])
+  const groundShadowScale = useTransform(easedOpen, [0, 1], [0.85, 1])
+
+  const labelOpacity = useTransform(scrollYProgress, [0, 0.05, 0.12, 0.18], [1, 1, 0.5, 0])
+  const labelY = useTransform(scrollYProgress, [0, 0.18], ['0px', '-36px'])
+  const hintOpacity = useTransform(scrollYProgress, [0, 0.05, 0.9, 1.0], [0, 0.45, 0.45, 0])
+
+  if (reduced) return <StaticLaptop />
 
   return (
     <div ref={containerRef} style={{ height: '290vh' }} className="relative">
@@ -93,23 +233,23 @@ export default function LaptopReveal() {
         className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden"
         style={{ backgroundColor: '#0c0c10' }}
       >
-        {/* ── Ambient orbs ── */}
         <AmbientOrbs intensity={0.7} />
 
-        {/* ── Screen glow intensifies as lid opens ── */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{ opacity: glowOpacity }}
-          aria-hidden="true"
-        >
-          <div style={{
-            position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)',
-            width: '55%', height: '55%',
-            background: 'radial-gradient(ellipse at 50% 70%, rgba(224,123,0,0.14) 0%, transparent 70%)',
-          }} />
+        {/* Ambient screen glow — intensifies once the display powers on */}
+        <motion.div className="absolute inset-0 pointer-events-none" style={{ opacity: glowOpacity }} aria-hidden="true">
+          <div
+            style={{
+              position: 'absolute',
+              top: '10%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '55%',
+              height: '55%',
+              background: 'radial-gradient(ellipse at 50% 70%, rgba(224,123,0,0.14) 0%, transparent 70%)',
+            }}
+          />
         </motion.div>
 
-        {/* ── Label ── */}
         <motion.div
           className="absolute flex flex-col items-center gap-1.5 select-none pointer-events-none"
           style={{ opacity: labelOpacity, y: labelY, top: '10%' }}
@@ -120,145 +260,146 @@ export default function LaptopReveal() {
         </motion.div>
 
         {/* ── MacBook ── */}
-        <motion.div style={{ opacity: laptopOpacity, perspective: 1400 }} className="flex flex-col items-center w-full px-4">
+        <motion.div
+          style={{ opacity: laptopOpacity, perspective: 1400 }}
+          className="flex flex-col items-center w-full px-4"
+          aria-hidden="true"
+        >
           {/* Slight fixed camera tilt — matches a laptop shot from just above eye level */}
           <div style={{ width: 'min(92vw, 640px)', transform: 'rotateX(8deg)', transformStyle: 'preserve-3d' }}>
-
-            {/* Screen housing — light aluminum, like a real MacBook lid */}
-            <div ref={screenBoxRef} style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-              <div style={{
-                background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
-                borderRadius: '16px 16px 0 0',
-                padding: '9px 9px 0',
-                boxShadow: '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
-                perspective: 900,
-              }}>
-                {/* Camera notch */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 3,
-                }}>
+            <div style={{ paddingLeft: '3%', paddingRight: '3%', position: 'relative', perspective: 900 }}>
+              {/* The entire lid — bezel, notch and screen together — rotates
+                  as one rigid unit on its bottom hinge. Only the screen
+                  rotating (and not the bezel around it) was the earlier bug:
+                  a "closed" laptop rendered as a full-height silver panel
+                  with a tiny foreshortened screen floating inside it instead
+                  of a thin closed lid. */}
+              <motion.div
+                style={{
+                  background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
+                  borderRadius: '16px 16px 0 0',
+                  padding: '9px 9px 0',
+                  boxShadow:
+                    '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
+                  transformOrigin: 'bottom center',
+                  rotateX: screenTilt,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
                   <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
                 </div>
 
-                {/* Screen — a single rigid rectangle that rotates open on its
-                    bottom hinge, like a real lid (rather than growing from
-                    zero height), foreshortened to a thin sliver while closed */}
-                <motion.div
+                {/* Screen surface — stays flat within the rotating lid */}
+                <div
                   style={{
-                    height: screenTargetHeight || undefined,
+                    aspectRatio: SCREEN_ASPECT,
+                    position: 'relative',
                     overflow: 'hidden',
                     background: '#08080d',
                     borderRadius: '6px 6px 0 0',
-                    transformOrigin: 'bottom center',
-                    rotateX: screenTilt,
                     padding: '14px 18px',
                   }}
                 >
-                    {/* macOS traffic lights */}
-                    <div style={{ display: 'flex', gap: 6, marginBottom: 12, alignItems: 'center' }}>
-                      {['#ff5f57', '#febc2e', '#28c840'].map((c) => (
-                        <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
-                      ))}
-                      <span style={{
-                        marginLeft: 8,
-                        color: 'rgba(255,255,255,0.22)',
-                        fontSize: 'clamp(8px, 1.1vw, 11px)',
-                        fontFamily: 'ui-monospace,"Cascadia Code","Fira Code",Menlo,monospace',
-                      }}>
-                        zsh — 80×24
-                      </span>
-                    </div>
+                  {/* Glass reflection sweep */}
+                  <motion.div
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      inset: '-20%',
+                      width: '45%',
+                      x: sheenX,
+                      opacity: sheenOpacity,
+                      background:
+                        'linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)',
+                      mixBlendMode: 'screen',
+                      pointerEvents: 'none',
+                    }}
+                  />
 
-                    {/* Terminal text */}
-                    <motion.div
-                      style={{
-                        opacity: contentOpacity,
-                        fontFamily: 'ui-monospace,"Cascadia Code","Fira Code",Menlo,monospace',
-                        fontSize: 'clamp(8.5px, 1.35vw, 12.5px)',
-                        lineHeight: 1.75,
-                        color: 'rgba(255,255,255,0.78)',
-                      }}
-                    >
-                      {LINES.map((line, i) => (
-                        <div key={i} className={line.cls}>
-                          {line.txt || ' '}
-                        </div>
-                      ))}
-                    </motion.div>
-                </motion.div>
+                  {/* Backlight vignette once powered on */}
+                  <motion.div
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      opacity: backlightOpacity,
+                      background: 'radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.06) 0%, transparent 60%)',
+                      pointerEvents: 'none',
+                    }}
+                  />
 
-              </div>
-            </div>
+                  <motion.div style={{ opacity: contentOpacity, y: contentY, position: 'relative' }}>
+                    <TerminalContent />
+                  </motion.div>
 
-            {/* Hinge — thin recessed line where lid meets the deck */}
-            <div style={{
-              height: 4,
-              background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
-            }} />
-
-            {/* Keyboard base — light aluminum deck */}
-            <div style={{
-              background: 'linear-gradient(180deg, #e8eaed 0%, #d2d5da 100%)',
-              borderRadius: '0 0 16px 16px',
-              padding: '12px 18px 8px',
-              boxShadow: '0 14px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.7)',
-            }}>
-              {/* Function row */}
-              <div style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
-                {Array.from({ length: 14 }).map((_, i) => <Key key={i} />)}
-              </div>
-              {/* 4 typing rows */}
-              {[14, 14, 13, 11].map((count, row) => (
-                <div key={row} style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
-                  {Array.from({ length: count }).map((_, i) => (
-                    <Key key={i} flex={row === 3 && (i === 0 || i === count - 1) ? 1.8 : 1} />
-                  ))}
+                  {/* Power-on flash */}
+                  <motion.div
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      opacity: powerOnOpacity,
+                      background:
+                        'radial-gradient(circle at 50% 45%, rgba(255,250,240,0.95) 0%, rgba(224,123,0,0.35) 35%, transparent 70%)',
+                      pointerEvents: 'none',
+                    }}
+                  />
                 </div>
-              ))}
-              {/* Spacebar row */}
-              <div style={{ display: 'flex', gap: 3, marginBottom: 8 }}>
-                {[1, 1, 4, 1, 1].map((flex, i) => <Key key={i} flex={flex} />)}
-              </div>
-              {/* Trackpad */}
-              <div style={{
-                width: '36%',
-                height: 'clamp(34px, 4.5vw, 56px)',
-                background: '#dde0e4',
-                borderRadius: 6,
-                margin: '0 auto 4px',
-                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.6)',
-                border: '1px solid rgba(0,0,0,0.08)',
-              }} />
+              </motion.div>
+
+              {/* Hinge crease shadow — deepest while closed */}
+              <motion.div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  left: '3%',
+                  right: '3%',
+                  bottom: -2,
+                  height: 12,
+                  opacity: hingeShadowOpacity,
+                  background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.55) 70%)',
+                  pointerEvents: 'none',
+                }}
+              />
             </div>
+
+            {/* Hinge */}
+            <div
+              style={{
+                height: 4,
+                background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+              }}
+            />
+
+            <KeyboardDeck />
 
             {/* Bottom rim */}
-            <div style={{
-              height: 5,
-              background: 'linear-gradient(180deg, #d2d5da 0%, #b8bbc1 100%)',
-              borderRadius: '0 0 6px 6px',
-              boxShadow: '0 10px 28px rgba(0,0,0,0.55)',
-            }} />
+            <div
+              style={{
+                height: 5,
+                background: 'linear-gradient(180deg, #d2d5da 0%, #b8bbc1 100%)',
+                borderRadius: '0 0 6px 6px',
+                boxShadow: '0 10px 28px rgba(0,0,0,0.55)',
+              }}
+            />
 
-            {/* Ground shadow — sells the laptop as sitting in the scene */}
+            {/* Ground shadow — sells the laptop as sitting in the scene, and
+                widens slightly as the lid opens for a subtle sense of weight */}
             <motion.div
               aria-hidden="true"
               style={{
                 opacity: laptopOpacity,
+                scaleX: groundShadowScale,
                 width: '70%',
                 height: 'clamp(14px, 2.5vw, 24px)',
                 margin: '10px auto 0',
                 background: 'radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 72%)',
               }}
             />
-
           </div>
         </motion.div>
 
-        {/* ── Scroll hint ── */}
         <motion.div
           className="absolute bottom-7 left-1/2 -translate-x-1/2 pointer-events-none"
           style={{ opacity: hintOpacity }}
@@ -266,7 +407,10 @@ export default function LaptopReveal() {
         >
           <motion.svg
             className="w-5 h-5 text-white/30"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
           >
