@@ -73,14 +73,14 @@ export default function LaptopReveal() {
 
   // Laptop fades in at the start
   const laptopOpacity  = useTransform(scrollYProgress, [0, 0.10], [0, 1])
-  // Screen lid height: 0 → full (the "opening" motion)
-  const screenH        = useTransform(scrollYProgress, [0.08, 0.78], [0, screenTargetHeight])
-  // Perspective tilt while lid opens (creates 3D lid illusion)
-  const screenTilt     = useTransform(scrollYProgress, [0.08, 0.78], [52, 0])
+  // Lid hinge rotation: starts nearly flat/closed (steep angle, foreshortened
+  // to a thin sliver by the perspective) and swings up to fully open (0deg,
+  // facing the viewer) — a single rigid rotation, like a real laptop lid.
+  const screenTilt     = useTransform(scrollYProgress, [0.06, 0.72], [84, 0])
   // Terminal content appears only when screen is mostly open
-  const contentOpacity = useTransform(scrollYProgress, [0.55, 0.78], [0, 1])
+  const contentOpacity = useTransform(scrollYProgress, [0.5, 0.72], [0, 1])
   // Ambient screen glow intensifies as screen opens
-  const glowOpacity    = useTransform(scrollYProgress, [0.35, 0.78], [0, 0.9])
+  const glowOpacity    = useTransform(scrollYProgress, [0.3, 0.72], [0, 0.9])
   // Label above laptop fades away as laptop opens
   const labelOpacity   = useTransform(scrollYProgress, [0, 0.15, 0.30, 0.40], [1, 1, 0.5, 0])
   const labelY         = useTransform(scrollYProgress, [0, 0.40], ['0px', '-36px'])
@@ -120,8 +120,9 @@ export default function LaptopReveal() {
         </motion.div>
 
         {/* ── MacBook ── */}
-        <motion.div style={{ opacity: laptopOpacity }} className="flex flex-col items-center w-full px-4">
-          <div style={{ width: 'min(92vw, 640px)' }}>
+        <motion.div style={{ opacity: laptopOpacity, perspective: 1400 }} className="flex flex-col items-center w-full px-4">
+          {/* Slight fixed camera tilt — matches a laptop shot from just above eye level */}
+          <div style={{ width: 'min(92vw, 640px)', transform: 'rotateX(8deg)', transformStyle: 'preserve-3d' }}>
 
             {/* Screen housing — light aluminum, like a real MacBook lid */}
             <div ref={screenBoxRef} style={{ paddingLeft: '3%', paddingRight: '3%' }}>
@@ -130,6 +131,7 @@ export default function LaptopReveal() {
                 borderRadius: '16px 16px 0 0',
                 padding: '9px 9px 0',
                 boxShadow: '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
+                perspective: 900,
               }}>
                 {/* Camera notch */}
                 <div style={{
@@ -141,25 +143,20 @@ export default function LaptopReveal() {
                   <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
                 </div>
 
-                {/* Screen — height animated for lid-opening effect */}
+                {/* Screen — a single rigid rectangle that rotates open on its
+                    bottom hinge, like a real lid (rather than growing from
+                    zero height), foreshortened to a thin sliver while closed */}
                 <motion.div
                   style={{
-                    height: screenH,
+                    height: screenTargetHeight || undefined,
                     overflow: 'hidden',
                     background: '#08080d',
                     borderRadius: '6px 6px 0 0',
-                    perspective: '700px',
+                    transformOrigin: 'bottom center',
+                    rotateX: screenTilt,
+                    padding: '14px 18px',
                   }}
                 >
-                  {/* Inner content with tilt for 3D illusion */}
-                  <motion.div
-                    style={{
-                      rotateX: screenTilt,
-                      transformOrigin: 'bottom center',
-                      height: screenTargetHeight || undefined,
-                      padding: '14px 18px',
-                    }}
-                  >
                     {/* macOS traffic lights */}
                     <div style={{ display: 'flex', gap: 6, marginBottom: 12, alignItems: 'center' }}>
                       {['#ff5f57', '#febc2e', '#28c840'].map((c) => (
@@ -191,7 +188,6 @@ export default function LaptopReveal() {
                         </div>
                       ))}
                     </motion.div>
-                  </motion.div>
                 </motion.div>
 
               </div>
