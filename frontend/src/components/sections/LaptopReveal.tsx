@@ -1,7 +1,11 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import AmbientOrbs from '@/components/ui/AmbientOrbs'
+
+// Real MacBook display ratio (~16:10.3). The screen box's height is derived
+// from its measured width so it never looks stretched at any viewport size.
+const SCREEN_ASPECT = 16 / 10.3
 
 // Terminal lines shown when screen opens
 const LINES = [
@@ -41,16 +45,35 @@ function Key({ flex = 1 }: { flex?: number }) {
 export default function LaptopReveal() {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
+  const screenBoxRef = useRef<HTMLDivElement>(null)
+  const [screenWidth, setScreenWidth] = useState(0)
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   })
 
+  // Measure the screen box's actual rendered width so its target height can
+  // be derived from a real aspect ratio instead of a fixed pixel value —
+  // a fixed height looked badly stretched on narrow (mobile) viewports.
+  useEffect(() => {
+    const el = screenBoxRef.current
+    if (!el) return
+    const update = () => { setScreenWidth(el.offsetWidth) }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => { ro.disconnect() }
+  }, [])
+
+  // screenWidth is the housing's outer width; subtract its own 10px+10px
+  // inner padding to get the actual screen box width the ratio applies to.
+  const screenTargetHeight = Math.max(screenWidth - 20, 0) / SCREEN_ASPECT
+
   // Laptop fades in at the start
   const laptopOpacity  = useTransform(scrollYProgress, [0, 0.10], [0, 1])
   // Screen lid height: 0 → full (the "opening" motion)
-  const screenH        = useTransform(scrollYProgress, [0.08, 0.78], [0, 370])
+  const screenH        = useTransform(scrollYProgress, [0.08, 0.78], [0, screenTargetHeight])
   // Perspective tilt while lid opens (creates 3D lid illusion)
   const screenTilt     = useTransform(scrollYProgress, [0.08, 0.78], [52, 0])
   // Terminal content appears only when screen is mostly open
@@ -100,7 +123,7 @@ export default function LaptopReveal() {
           <div style={{ width: 'min(92vw, 640px)' }}>
 
             {/* Screen housing */}
-            <div style={{ paddingLeft: '3%', paddingRight: '3%' }}>
+            <div ref={screenBoxRef} style={{ paddingLeft: '3%', paddingRight: '3%' }}>
               <div style={{
                 background: 'linear-gradient(180deg, #242432 0%, #1e1e2a 100%)',
                 borderRadius: '14px 14px 0 0',
@@ -135,7 +158,7 @@ export default function LaptopReveal() {
                     style={{
                       rotateX: screenTilt,
                       transformOrigin: 'bottom center',
-                      height: 370,
+                      height: screenTargetHeight || undefined,
                       padding: '14px 18px',
                     }}
                   >
