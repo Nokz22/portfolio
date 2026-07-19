@@ -12,6 +12,22 @@ const SCREEN_ASPECT = '16 / 10.3'
 // at fully open — never a linear scroll-locked rotation.
 const hingeEase = cubicBezier(0.65, 0, 0.35, 1)
 
+// ─── Camera + hinge geometry ─────────────────────────────────────────────
+// The previous version only tilted the *lid*; the keyboard deck stayed
+// perfectly flat and front-on, which is why the screen read far larger
+// than the keyboard — nothing in the scene shared its perspective. Real
+// "hero shot" laptop renders tilt the whole body on one shared axis, so
+// the deck recedes into a true foreshortened trapezoid while the lid
+// swings open on top of that same tilt. One `perspective` root + one
+// rotated rig, everything else stays in that 3D space via preserve-3d.
+const RIG_TILT = 26 // deg — fixed tilt of the whole body (the "looking down at a desk" angle)
+const RIG_PERSPECTIVE = 2600 // px — a small perspective + a tall rotating lid flips into a bowtie past ~90°; keep this generous
+// The lid sits in normal document flow directly above the deck, so its
+// un-rotated pose (0°) already reads as "standing open" — closed needs a
+// +90-ish fold down onto the keyboard, not 0.
+const LID_CLOSED = 92 // deg, local to the rig — folded down flat onto the deck
+const LID_OPEN = -6 // deg, local to the rig — a few degrees past vertical for a natural recline
+
 // Terminal lines shown once the screen powers on
 const LINES = [
   { txt: 'nuno@portfolio:~$ cat about.json', cls: 'text-amber-400' },
@@ -32,13 +48,17 @@ const LINES = [
   { txt: 'nuno@portfolio:~$ █', cls: 'text-amber-400' },
 ]
 
-// Small key block for the keyboard grid — light aluminum keycap
+// Small key block for the keyboard grid — light aluminum keycap.
+// Sized a notch larger than a literal top-down key would be, because the
+// rig's perspective tilt (see RIG_TILT) compresses the whole deck — this
+// keeps the keyboard reading with real presence once foreshortened,
+// instead of shrinking into an illegible sliver.
 function Key({ flex = 1 }: { flex?: number }) {
   return (
     <div
       style={{
         flex,
-        height: 'clamp(10px, 1.8vw, 18px)',
+        height: 'clamp(13px, 2.3vw, 23px)',
         background: '#f2f3f5',
         borderRadius: 3,
         border: '1px solid rgba(0,0,0,0.08)',
@@ -92,23 +112,23 @@ function KeyboardDeck() {
       style={{
         background: 'linear-gradient(180deg, #e8eaed 0%, #d2d5da 100%)',
         borderRadius: '0 0 16px 16px',
-        padding: '12px 18px 8px',
+        padding: '16px 20px 16px',
         boxShadow: '0 14px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.7)',
       }}
     >
-      <div style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
         {Array.from({ length: 14 }).map((_, i) => (
           <Key key={i} />
         ))}
       </div>
       {[14, 14, 13, 11].map((count, row) => (
-        <div key={row} style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
+        <div key={row} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
           {Array.from({ length: count }).map((_, i) => (
             <Key key={i} flex={row === 3 && (i === 0 || i === count - 1) ? 1.8 : 1} />
           ))}
         </div>
       ))}
-      <div style={{ display: 'flex', gap: 3, marginBottom: 8 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
         {[1, 1, 4, 1, 1].map((flex, i) => (
           <Key key={i} flex={flex} />
         ))}
@@ -116,7 +136,7 @@ function KeyboardDeck() {
       <div
         style={{
           width: '36%',
-          height: 'clamp(34px, 4.5vw, 56px)',
+          height: 'clamp(42px, 5.8vw, 72px)',
           background: '#dde0e4',
           borderRadius: 6,
           margin: '0 auto 4px',
@@ -137,44 +157,48 @@ function StaticLaptop() {
       <AmbientOrbs intensity={0.5} />
       <div
         className="relative z-10 mx-auto flex flex-col items-center"
-        style={{ width: 'min(92vw, 640px)' }}
+        style={{ width: 'min(92vw, 640px)', perspective: RIG_PERSPECTIVE }}
         aria-hidden="true"
       >
-        <div style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-          <div
-            style={{
-              background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
-              borderRadius: '16px 16px 0 0',
-              padding: '9px 9px 0',
-              boxShadow:
-                '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
-              <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
-            </div>
+        <div style={{ width: '100%', transformStyle: 'preserve-3d', transform: `rotateX(${String(RIG_TILT)}deg)` }}>
+          <div style={{ paddingLeft: '3%', paddingRight: '3%' }}>
             <div
               style={{
-                aspectRatio: SCREEN_ASPECT,
-                overflow: 'hidden',
-                background: '#08080d',
-                borderRadius: '6px 6px 0 0',
-                padding: '14px 18px',
+                background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
+                borderRadius: '16px 16px 0 0',
+                padding: '9px 9px 0',
+                boxShadow:
+                  '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
+                transformOrigin: 'bottom center',
+                transform: `rotateX(${String(LID_OPEN)}deg)`,
               }}
             >
-              <TerminalContent />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
+                <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
+              </div>
+              <div
+                style={{
+                  aspectRatio: SCREEN_ASPECT,
+                  overflow: 'hidden',
+                  background: '#08080d',
+                  borderRadius: '6px 6px 0 0',
+                  padding: '14px 18px',
+                }}
+              >
+                <TerminalContent />
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          style={{
-            height: 4,
-            width: '100%',
-            background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
-          }}
-        />
-        <div style={{ width: '100%' }}>
-          <KeyboardDeck />
+          <div
+            style={{
+              height: 4,
+              width: '100%',
+              background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
+            }}
+          />
+          <div style={{ width: '100%' }}>
+            <KeyboardDeck />
+          </div>
         </div>
       </div>
       <p className="relative z-10 text-center text-white/40 text-sm mt-8">{t('laptop.open_env')}</p>
@@ -199,7 +223,7 @@ export default function LaptopReveal() {
   // this is what makes it feel like a real lid rather than a value slider.
   const rawOpen = useTransform(scrollYProgress, [0.05, 0.6], [0, 1])
   const easedOpen = useTransform(rawOpen, hingeEase)
-  const screenTilt = useTransform(easedOpen, [0, 1], [84, 0])
+  const lidAngle = useTransform(easedOpen, [0, 1], [LID_CLOSED, LID_OPEN])
 
   // Glass reflection sweeping across the screen as it rotates — the cue
   // that reads as "real material catching light," not a flat shape turning.
@@ -208,7 +232,7 @@ export default function LaptopReveal() {
 
   // Ambient occlusion in the hinge crease — deepest while closed, fading
   // as the lid lifts clear of the deck.
-  const hingeShadowOpacity = useTransform(screenTilt, [84, 0], [0.85, 0.15])
+  const hingeShadowOpacity = useTransform(lidAngle, [LID_CLOSED, LID_OPEN], [0.85, 0.15])
 
   // The screen "powers on" as a distinct beat once the lid has finished
   // opening: a quick bright pulse, a lingering backlight, then — a moment
@@ -261,19 +285,27 @@ export default function LaptopReveal() {
 
         {/* ── MacBook ── */}
         <motion.div
-          style={{ opacity: laptopOpacity, perspective: 1400 }}
+          style={{ opacity: laptopOpacity, perspective: RIG_PERSPECTIVE }}
           className="flex flex-col items-center w-full px-4"
           aria-hidden="true"
         >
-          {/* Slight fixed camera tilt — matches a laptop shot from just above eye level */}
-          <div style={{ width: 'min(92vw, 640px)', transform: 'rotateX(8deg)', transformStyle: 'preserve-3d' }}>
-            <div style={{ paddingLeft: '3%', paddingRight: '3%', position: 'relative', perspective: 900 }}>
+          {/* One shared camera tilt for the whole body — the deck and the
+              lid both live in this single 3D space (preserve-3d all the
+              way down, one perspective root), so the keyboard gets real
+              foreshortening instead of sitting flat under an oversized
+              screen. This is what a photographed laptop actually looks
+              like from a "looking down at the desk" angle. */}
+          <div
+            style={{
+              width: 'min(90vw, 640px)',
+              transform: `rotateX(${String(RIG_TILT)}deg)`,
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <div style={{ paddingLeft: '3%', paddingRight: '3%', position: 'relative', transformStyle: 'preserve-3d' }}>
               {/* The entire lid — bezel, notch and screen together — rotates
-                  as one rigid unit on its bottom hinge. Only the screen
-                  rotating (and not the bezel around it) was the earlier bug:
-                  a "closed" laptop rendered as a full-height silver panel
-                  with a tiny foreshortened screen floating inside it instead
-                  of a thin closed lid. */}
+                  as one rigid unit on its bottom hinge, on top of the
+                  shared rig tilt above. */}
               <motion.div
                 style={{
                   background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
@@ -282,7 +314,8 @@ export default function LaptopReveal() {
                   boxShadow:
                     '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
                   transformOrigin: 'bottom center',
-                  rotateX: screenTilt,
+                  transformStyle: 'preserve-3d',
+                  rotateX: lidAngle,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
