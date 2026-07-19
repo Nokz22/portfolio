@@ -1,34 +1,43 @@
 import { useRef } from 'react'
-import { motion, useScroll, useTransform, useReducedMotion, cubicBezier } from 'framer-motion'
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+  useReducedMotion,
+  cubicBezier,
+  type MotionValue,
+} from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import AmbientOrbs from '@/components/ui/AmbientOrbs'
 
-// Real MacBook display ratio (~16:10.3) — CSS aspect-ratio keeps the screen
-// correctly proportioned at any width with no JS measurement needed.
-const SCREEN_ASPECT = '16 / 10.3'
+// ─── True-3D construction ────────────────────────────────────────────────
+// The laptop is built like a CSS 3D object, not a flat mockup: one
+// perspective "camera", one rig (pitch / yaw / scale, all scroll-driven),
+// and a hinge box the size of the screen. Deck and lid are two planes
+// hinged on the box's bottom edge:
+//   - deck: static rotateX(-90) lies flat toward the viewer; an inner
+//     rotateX(180) flip turns its visible face up without mirroring
+//   - lid: scroll-scrubbed rotateX from -90 (closed, flat on the deck,
+//     aluminum shell facing up) to slightly past vertical (open)
+// Each lid side is its own face with backface-visibility:hidden, so the
+// shell shows while closed and the display shows while open — exactly
+// like a real object turning in space.
 
-// A weighted, physical-feeling curve for the hinge: slow to start (as if
-// overcoming resistance), swings freely through the middle, settles softly
-// at fully open — never a linear scroll-locked rotation.
+const SCREEN_ASPECT = '16 / 10.3'
+const PERSPECTIVE = 1500
+const LID_CLOSED = -90 // folded flat onto the deck
+const LID_OPEN = 8 // a touch past vertical — natural recline
+const DECK_THICKNESS = 12 // px, extruded body height
+
+const ALU_TOP = 'linear-gradient(180deg, #f1f2f5 0%, #dddfe4 55%, #ced1d7 100%)'
+const ALU_SHELL = 'linear-gradient(160deg, #eef0f3 0%, #d6d9de 60%, #c3c6cc 100%)'
+const ALU_EDGE = 'linear-gradient(180deg, #dfe1e5 0%, #b5b8be 55%, #8b8e94 100%)'
+
+// Weighted hinge: slow to unstick, free through the middle, soft settle.
 const hingeEase = cubicBezier(0.65, 0, 0.35, 1)
 
-// ─── Camera + hinge geometry ─────────────────────────────────────────────
-// The previous version only tilted the *lid*; the keyboard deck stayed
-// perfectly flat and front-on, which is why the screen read far larger
-// than the keyboard — nothing in the scene shared its perspective. Real
-// "hero shot" laptop renders tilt the whole body on one shared axis, so
-// the deck recedes into a true foreshortened trapezoid while the lid
-// swings open on top of that same tilt. One `perspective` root + one
-// rotated rig, everything else stays in that 3D space via preserve-3d.
-const RIG_TILT = 26 // deg — fixed tilt of the whole body (the "looking down at a desk" angle)
-const RIG_PERSPECTIVE = 2600 // px — a small perspective + a tall rotating lid flips into a bowtie past ~90°; keep this generous
-// The lid sits in normal document flow directly above the deck, so its
-// un-rotated pose (0°) already reads as "standing open" — closed needs a
-// +90-ish fold down onto the keyboard, not 0.
-const LID_CLOSED = 92 // deg, local to the rig — folded down flat onto the deck
-const LID_OPEN = -6 // deg, local to the rig — a few degrees past vertical for a natural recline
-
-// Terminal lines shown once the screen powers on
 const LINES = [
   { txt: 'nuno@portfolio:~$ cat about.json', cls: 'text-amber-400' },
   { txt: '', cls: '' },
@@ -45,32 +54,49 @@ const LINES = [
   { txt: '  VITE v5.4  ready in 187ms', cls: 'text-emerald-400' },
   { txt: '  ➜  Local:  http://localhost:3000/', cls: 'text-sky-400' },
   { txt: '', cls: '' },
-  { txt: 'nuno@portfolio:~$ █', cls: 'text-amber-400' },
 ]
 
-// Small key block for the keyboard grid — light aluminum keycap.
-// Sized a notch larger than a literal top-down key would be, because the
-// rig's perspective tilt (see RIG_TILT) compresses the whole deck — this
-// keeps the keyboard reading with real presence once foreshortened,
-// instead of shrinking into an illegible sliver. A domed per-key gradient
-// (not a flat fill) is what actually sells "individual keycap" rather
-// than "grid of tiles" — flat fills are the templated-mockup tell.
 function Key({ flex = 1 }: { flex?: number }) {
   return (
     <div
       style={{
         flex,
-        height: 'clamp(13px, 2.3vw, 23px)',
         background: 'linear-gradient(150deg, #fdfdfe 0%, #eef0f3 55%, #dfe2e6 100%)',
-        borderRadius: 3,
+        borderRadius: 4,
         border: '1px solid rgba(0,0,0,0.10)',
-        boxShadow: '0 1px 0 rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.95)',
+        boxShadow: '0 1px 0 rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.95)',
       }}
     />
   )
 }
 
-function TerminalContent() {
+// Terminal lines reveal one by one as the scroll advances — the screen
+// "types itself" while the user scrolls instead of fading in as a block.
+function TerminalLine({
+  progress,
+  index,
+  total,
+  txt,
+  cls,
+}: {
+  progress: MotionValue<number>
+  index: number
+  total: number
+  txt: string
+  cls: string
+}) {
+  const start = index / total
+  const opacity = useTransform(progress, [start, Math.min(start + 0.06, 1)], [0, 1])
+  return (
+    <motion.div style={{ opacity }} className={cls}>
+      {txt || ' '}
+    </motion.div>
+  )
+}
+
+function TerminalContent({ progress }: { progress: MotionValue<number> }) {
+  const total = LINES.length + 1
+  const promptOpacity = useTransform(progress, [LINES.length / total, 1], [0, 1])
   return (
     <>
       <div style={{ display: 'flex', gap: 6, marginBottom: 12, alignItems: 'center' }}>
@@ -91,37 +117,39 @@ function TerminalContent() {
       <div
         style={{
           fontFamily: 'ui-monospace,"Cascadia Code","Fira Code",Menlo,monospace',
-          fontSize: 'clamp(8.5px, 1.35vw, 12.5px)',
-          lineHeight: 1.75,
+          fontSize: 'clamp(8.5px, 1.3vw, 12px)',
+          lineHeight: 1.7,
           color: 'rgba(255,255,255,0.78)',
         }}
       >
         {LINES.map((line, i) => (
-          <div key={i} className={line.cls}>
-            {line.txt || ' '}
-          </div>
+          <TerminalLine key={i} progress={progress} index={i} total={total} txt={line.txt} cls={line.cls} />
         ))}
+        <motion.div style={{ opacity: promptOpacity }} className="text-amber-400">
+          nuno@portfolio:~${' '}
+          <span style={{ animation: 'lr-blink 1.1s steps(2, start) infinite' }}>█</span>
+        </motion.div>
       </div>
     </>
   )
 }
 
-// Keyboard deck + trackpad — identical for both the animated and the
-// reduced-motion static variant.
-function KeyboardDeck() {
+// Top face of the deck — keyboard well, keys, trackpad, and a screen-light
+// wash that switches on with the display.
+function DeckFace({ backlight }: { backlight: MotionValue<number> }) {
+  const glowOpacity = useTransform(backlight, [0, 1], [0, 0.38])
   return (
     <div
       style={{
-        position: 'relative',
-        background: 'linear-gradient(180deg, #e8eaed 0%, #d2d5da 100%)',
-        borderRadius: '0 0 16px 16px',
-        padding: '16px 20px 16px',
-        boxShadow: '0 14px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.7)',
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 16,
         overflow: 'hidden',
+        background: ALU_TOP,
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -2px 8px rgba(0,0,0,0.10)',
       }}
     >
-      {/* Diagonal light catching the anodized deck — the cue that reads as
-          "real machined metal" instead of a flat UI panel. */}
+      {/* Diagonal light across the anodized deck */}
       <div
         aria-hidden="true"
         style={{
@@ -131,106 +159,68 @@ function KeyboardDeck() {
           pointerEvents: 'none',
         }}
       />
-      <div style={{ position: 'relative', display: 'flex', gap: 4, marginBottom: 4 }}>
-        {Array.from({ length: 14 }).map((_, i) => (
-          <Key key={i} />
-        ))}
-      </div>
-      {[14, 14, 13, 11].map((count, row) => (
-        <div key={row} style={{ position: 'relative', display: 'flex', gap: 4, marginBottom: 4 }}>
-          {Array.from({ length: count }).map((_, i) => (
-            <Key key={i} flex={row === 3 && (i === 0 || i === count - 1) ? 1.8 : 1} />
-          ))}
-        </div>
-      ))}
-      <div style={{ position: 'relative', display: 'flex', gap: 4, marginBottom: 10 }}>
-        {[1, 1, 4, 1, 1].map((flex, i) => (
-          <Key key={i} flex={flex} />
-        ))}
-      </div>
+      {/* Keyboard well — slightly recessed */}
       <div
         style={{
-          position: 'relative',
-          width: '36%',
-          height: 'clamp(42px, 5.8vw, 72px)',
-          background: 'linear-gradient(150deg, #e6e8ec 0%, #d3d6db 60%, #c5c8ce 100%)',
-          borderRadius: 6,
-          margin: '0 auto 4px',
-          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.6)',
-          border: '1px solid rgba(0,0,0,0.08)',
+          position: 'absolute',
+          top: '7%',
+          left: '10%',
+          right: '10%',
+          height: '54%',
+          borderRadius: 10,
+          background: 'linear-gradient(180deg, #d4d7dc 0%, #c7cad0 100%)',
+          boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.18)',
+          padding: '1.4%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '3.5%',
+        }}
+      >
+        <div style={{ display: 'flex', gap: '0.9%', flex: 0.62 }}>
+          {Array.from({ length: 14 }).map((_, i) => (
+            <Key key={i} />
+          ))}
+        </div>
+        {[14, 14, 13, 11].map((count, row) => (
+          <div key={row} style={{ display: 'flex', gap: '0.9%', flex: 1 }}>
+            {Array.from({ length: count }).map((_, i) => (
+              <Key key={i} flex={row === 3 && (i === 0 || i === count - 1) ? 1.8 : 1} />
+            ))}
+          </div>
+        ))}
+        <div style={{ display: 'flex', gap: '0.9%', flex: 1 }}>
+          {[1, 1, 4, 1, 1].map((flex, i) => (
+            <Key key={i} flex={flex} />
+          ))}
+        </div>
+      </div>
+      {/* Trackpad */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '67%',
+          left: '32%',
+          right: '32%',
+          height: '27%',
+          borderRadius: 10,
+          background: 'linear-gradient(160deg, #e3e5e9 0%, #cdd0d6 100%)',
+          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.14), 0 1px 0 rgba(255,255,255,0.5)',
+          border: '1px solid rgba(0,0,0,0.07)',
+        }}
+      />
+      {/* Screen light falling on the deck once the display powers on */}
+      <motion.div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: glowOpacity,
+          background:
+            'linear-gradient(180deg, rgba(255,190,90,0.30) 0%, rgba(255,190,90,0.06) 45%, transparent 70%)',
+          pointerEvents: 'none',
         }}
       />
     </div>
-  )
-}
-
-// Reduced-motion fallback — a static, fully open, screen-on laptop with no
-// scroll-jacking. Keeps the same visual language without forcing motion.
-function StaticLaptop() {
-  const { t } = useTranslation()
-  return (
-    <section className="relative bg-[#0c0c10] py-24 px-6 overflow-hidden" aria-label="MacBook">
-      <AmbientOrbs intensity={0.5} />
-      <div
-        className="relative z-10 mx-auto flex flex-col items-center"
-        style={{ width: 'min(92vw, 640px)', perspective: RIG_PERSPECTIVE }}
-        aria-hidden="true"
-      >
-        <div style={{ width: '100%', transformStyle: 'preserve-3d', transform: `rotateX(${String(RIG_TILT)}deg)` }}>
-          <div style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-            <div
-              style={{
-                position: 'relative',
-                overflow: 'hidden',
-                background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
-                borderRadius: '16px 16px 0 0',
-                padding: '9px 9px 0',
-                boxShadow:
-                  '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
-                transformOrigin: 'bottom center',
-                transform: `rotateX(${String(LID_OPEN)}deg)`,
-              }}
-            >
-              <div
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(135deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.4) 100%)',
-                  pointerEvents: 'none',
-                }}
-              />
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
-                <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
-              </div>
-              <div
-                style={{
-                  position: 'relative',
-                  aspectRatio: SCREEN_ASPECT,
-                  overflow: 'hidden',
-                  background: '#08080d',
-                  borderRadius: '6px 6px 0 0',
-                  padding: '14px 18px',
-                }}
-              >
-                <TerminalContent />
-              </div>
-            </div>
-          </div>
-          <div
-            style={{
-              height: 4,
-              width: '100%',
-              background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
-            }}
-          />
-          <div style={{ width: '100%' }}>
-            <KeyboardDeck />
-          </div>
-        </div>
-      </div>
-      <p className="relative z-10 text-center text-white/40 text-sm mt-8">{t('laptop.open_env')}</p>
-    </section>
   )
 }
 
@@ -244,47 +234,71 @@ export default function LaptopReveal() {
     offset: ['start start', 'end end'],
   })
 
-  // Laptop fades in at the very start
-  const laptopOpacity = useTransform(scrollYProgress, [0, 0.06], [0, 1])
+  // Pointer parallax — the object subtly follows the cursor, which is a big
+  // part of the "alive" lusion.co feel. Springed so it glides, never snaps.
+  const pointerX = useMotionValue(0)
+  const pointerY = useMotionValue(0)
+  const springX = useSpring(pointerX, { stiffness: 55, damping: 16 })
+  const springY = useSpring(pointerY, { stiffness: 55, damping: 16 })
+  const parallax = reduced ? 0 : 1
 
-  // Raw scroll fraction dedicated to the hinge, then eased for weight —
-  // this is what makes it feel like a real lid rather than a value slider.
-  const rawOpen = useTransform(scrollYProgress, [0.05, 0.6], [0, 1])
-  const easedOpen = useTransform(rawOpen, hingeEase)
-  const lidAngle = useTransform(easedOpen, [0, 1], [LID_CLOSED, LID_OPEN])
+  const appear = useTransform(scrollYProgress, [0, 0.04], [0, 1])
 
-  // Glass reflection sweeping across the screen as it rotates — the cue
-  // that reads as "real material catching light," not a flat shape turning.
-  const sheenX = useTransform(easedOpen, [0, 1], ['-60%', '160%'])
-  const sheenOpacity = useTransform(easedOpen, [0, 0.45, 1], [0, 0.5, 0.08])
+  // The hinge scrub — the heart of the section.
+  const rawOpen = useTransform(scrollYProgress, [0.05, 0.62], [0, 1])
+  const eased = useTransform(rawOpen, hingeEase)
+  const lidAngle = useTransform(eased, [0, 1], [LID_CLOSED, LID_OPEN])
 
-  // Ambient occlusion in the hinge crease — deepest while closed, fading
-  // as the lid lifts clear of the deck.
-  const hingeShadowOpacity = useTransform(lidAngle, [LID_CLOSED, LID_OPEN], [0.85, 0.15])
+  // Camera choreography: constant slow yaw drift across the whole section
+  // (so the object never sits still), and a pitch that starts top-down on
+  // the closed slab and lowers as the screen rises.
+  const yawBase = useTransform(scrollYProgress, [0.02, 0.98], [-16, 6])
+  const pitchBase = useTransform(scrollYProgress, [0.05, 0.62, 1], [-31, -24, -22])
+  const rigYaw = useTransform([yawBase, springX], (v: number[]) => (v[0] ?? 0) + (v[1] ?? 0) * 4.5 * parallax)
+  const rigPitch = useTransform([pitchBase, springY], (v: number[]) => (v[0] ?? 0) + (v[1] ?? 0) * 3 * parallax)
+  const rigScale = useTransform(scrollYProgress, [0, 0.62, 1], [0.88, 0.97, 1.0])
+  const rigY = useTransform(eased, [0, 1], [30, -4])
 
-  // The screen "powers on" as a distinct beat once the lid has finished
-  // opening: a quick bright pulse, a lingering backlight, then — a moment
-  // later — the terminal content fades up.
-  const powerOnOpacity = useTransform(scrollYProgress, [0.58, 0.63, 0.68], [0, 1, 0])
-  const backlightOpacity = useTransform(scrollYProgress, [0.58, 0.66], [0, 1])
-  const contentOpacity = useTransform(scrollYProgress, [0.64, 0.78], [0, 1])
-  const contentY = useTransform(scrollYProgress, [0.64, 0.78], [8, 0])
+  // Glass reflection sweeping the display as the lid turns through the light
+  const sheenX = useTransform(eased, [0, 1], ['-80%', '180%'])
+  const sheenOpacity = useTransform(eased, [0, 0.5, 1], [0, 0.45, 0.06])
 
-  const glowOpacity = useTransform(scrollYProgress, [0.4, 0.66], [0, 0.9])
-  const groundShadowScale = useTransform(easedOpen, [0, 1], [0.85, 1])
+  // Power-on beat once the lid is up: flash, then backlight, then the
+  // terminal types itself line by line.
+  const powerOn = useTransform(scrollYProgress, [0.6, 0.645, 0.7], [0, 1, 0])
+  const backlight = useTransform(scrollYProgress, [0.6, 0.7], [0, 1])
+  const contentProgress = useTransform(scrollYProgress, [0.64, 0.88], [0, 1])
 
-  const labelOpacity = useTransform(scrollYProgress, [0, 0.05, 0.12, 0.18], [1, 1, 0.5, 0])
-  const labelY = useTransform(scrollYProgress, [0, 0.18], ['0px', '-36px'])
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.05, 0.9, 1.0], [0, 0.45, 0.45, 0])
+  const glowOpacity = useTransform(scrollYProgress, [0.45, 0.7], [0, 0.9])
+  const shadowScaleX = useTransform(eased, [0, 1], [1.06, 0.94])
+  const shadowOpacity = useTransform(eased, [0, 1], [0.6, 0.42])
 
-  if (reduced) return <StaticLaptop />
+  const labelOpacity = useTransform(scrollYProgress, [0, 0.04, 0.1, 0.16], [1, 1, 0.5, 0])
+  const labelY = useTransform(scrollYProgress, [0, 0.16], ['0px', '-36px'])
+  const hintOpacity = useTransform(scrollYProgress, [0, 0.05, 0.9, 1], [0, 0.45, 0.45, 0])
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (reduced) return
+    pointerX.set((e.clientX / window.innerWidth) * 2 - 1)
+    pointerY.set((e.clientY / window.innerHeight) * 2 - 1)
+  }
+  const onPointerLeave = () => {
+    pointerX.set(0)
+    pointerY.set(0)
+  }
 
   return (
-    <div ref={containerRef} style={{ height: '290vh' }} className="relative">
+    <div ref={containerRef} style={{ height: '320vh' }} className="relative">
       <div
         className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden"
         style={{ backgroundColor: '#0c0c10' }}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
       >
+        <style>{`
+          @keyframes lr-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+          @keyframes lr-blink { 0%, 55% { opacity: 1 } 56%, 100% { opacity: 0 } }
+        `}</style>
         <AmbientOrbs intensity={0.7} />
 
         {/* Ambient screen glow — intensifies once the display powers on */}
@@ -304,173 +318,306 @@ export default function LaptopReveal() {
 
         <motion.div
           className="absolute flex flex-col items-center gap-1.5 select-none pointer-events-none"
-          style={{ opacity: labelOpacity, y: labelY, top: '10%' }}
+          style={{ opacity: labelOpacity, y: labelY, top: '9%' }}
           aria-hidden="true"
         >
           <p className="text-white/25 text-[10px] tracking-[0.35em] uppercase">{t('laptop.scroll_label')}</p>
           <p className="text-white/50 text-base font-display font-medium tracking-tight">{t('laptop.open_env')}</p>
         </motion.div>
 
-        {/* ── MacBook ── */}
+        {/* ── MacBook: 3D scene ── */}
         <motion.div
-          style={{ opacity: laptopOpacity, perspective: RIG_PERSPECTIVE }}
-          className="flex flex-col items-center w-full px-4"
+          style={{
+            opacity: appear,
+            animation: reduced ? undefined : 'lr-float 7s ease-in-out infinite',
+          }}
           aria-hidden="true"
         >
-          {/* One shared camera tilt for the whole body — the deck and the
-              lid both live in this single 3D space (preserve-3d all the
-              way down, one perspective root), so the keyboard gets real
-              foreshortening instead of sitting flat under an oversized
-              screen. This is what a photographed laptop actually looks
-              like from a "looking down at the desk" angle. */}
-          <div
-            style={{
-              width: 'min(90vw, 640px)',
-              transform: `rotateX(${String(RIG_TILT)}deg)`,
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            <div style={{ paddingLeft: '3%', paddingRight: '3%', position: 'relative', transformStyle: 'preserve-3d' }}>
-              {/* The entire lid — bezel, notch and screen together — rotates
-                  as one rigid unit on its bottom hinge, on top of the
-                  shared rig tilt above. */}
-              <motion.div
-                style={{
-                  position: 'relative',
-                  background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
-                  borderRadius: '16px 16px 0 0',
-                  padding: '9px 9px 0',
-                  boxShadow:
-                    '0 -4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06)',
-                  transformOrigin: 'bottom center',
-                  transformStyle: 'preserve-3d',
-                  rotateX: lidAngle,
-                }}
-              >
-                {/* Diagonal light on the lid bezel — same "machined metal"
-                    cue as the deck, so both halves read as one material. */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    borderRadius: '16px 16px 0 0',
-                    background: 'linear-gradient(135deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.4) 100%)',
-                    pointerEvents: 'none',
-                  }}
-                />
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
-                  <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
-                </div>
-
-                {/* Screen surface — stays flat within the rotating lid */}
-                <div
-                  style={{
-                    position: 'relative',
-                    aspectRatio: SCREEN_ASPECT,
-                    overflow: 'hidden',
-                    background: '#08080d',
-                    borderRadius: '6px 6px 0 0',
-                    padding: '14px 18px',
-                  }}
-                >
-                  {/* Glass reflection sweep */}
-                  <motion.div
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      inset: '-20%',
-                      width: '45%',
-                      x: sheenX,
-                      opacity: sheenOpacity,
-                      background:
-                        'linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)',
-                      mixBlendMode: 'screen',
-                      pointerEvents: 'none',
-                    }}
-                  />
-
-                  {/* Backlight vignette once powered on */}
-                  <motion.div
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      opacity: backlightOpacity,
-                      background: 'radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.06) 0%, transparent 60%)',
-                      pointerEvents: 'none',
-                    }}
-                  />
-
-                  <motion.div style={{ opacity: contentOpacity, y: contentY, position: 'relative' }}>
-                    <TerminalContent />
-                  </motion.div>
-
-                  {/* Power-on flash */}
-                  <motion.div
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      opacity: powerOnOpacity,
-                      background:
-                        'radial-gradient(circle at 50% 45%, rgba(255,250,240,0.95) 0%, rgba(224,123,0,0.35) 35%, transparent 70%)',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                </div>
-              </motion.div>
-
-              {/* Hinge crease shadow — deepest while closed */}
-              <motion.div
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  left: '3%',
-                  right: '3%',
-                  bottom: -2,
-                  height: 12,
-                  opacity: hingeShadowOpacity,
-                  background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.55) 70%)',
-                  pointerEvents: 'none',
-                }}
-              />
-            </div>
-
-            {/* Hinge */}
-            <div
-              style={{
-                height: 4,
-                background: 'linear-gradient(180deg, #9a9da3 0%, #6b6e73 50%, #babdc2 100%)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
-              }}
-            />
-
-            <KeyboardDeck />
-
-            {/* Bottom rim */}
-            <div
-              style={{
-                height: 5,
-                background: 'linear-gradient(180deg, #d2d5da 0%, #b8bbc1 100%)',
-                borderRadius: '0 0 6px 6px',
-                boxShadow: '0 10px 28px rgba(0,0,0,0.55)',
-              }}
-            />
-
-            {/* Ground shadow — sells the laptop as sitting in the scene, and
-                widens slightly as the lid opens for a subtle sense of weight */}
+          {/* Camera */}
+          <div style={{ perspective: PERSPECTIVE, width: 'min(78vw, 620px)', marginTop: '-12vh', position: 'relative' }}>
+            {/* Ground shadow — painted before (under) the laptop */}
             <motion.div
               aria-hidden="true"
               style={{
-                opacity: laptopOpacity,
-                scaleX: groundShadowScale,
-                width: '70%',
-                height: 'clamp(14px, 2.5vw, 24px)',
-                margin: '10px auto 0',
-                background: 'radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 72%)',
+                position: 'absolute',
+                left: '10%',
+                width: '80%',
+                top: 'calc(100% + 150px)',
+                height: 44,
+                scaleX: shadowScaleX,
+                opacity: shadowOpacity,
+                background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.6) 0%, transparent 70%)',
+                filter: 'blur(6px)',
               }}
             />
+            {/* Rig — the whole body shares this pitch / yaw / scale */}
+            <motion.div
+              style={{
+                transformStyle: 'preserve-3d',
+                rotateX: rigPitch,
+                rotateY: rigYaw,
+                scale: rigScale,
+                y: rigY,
+                willChange: 'transform',
+              }}
+            >
+              {/* Hinge box — the screen rect; both planes hinge on its bottom edge */}
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  aspectRatio: SCREEN_ASPECT,
+                  transformStyle: 'preserve-3d',
+                }}
+              >
+                {/* ── DECK: lies flat toward the viewer ── */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    transformOrigin: 'bottom center',
+                    transform: 'rotateX(-90deg)',
+                    transformStyle: 'preserve-3d',
+                  }}
+                >
+                  {/* Inner flip so the deck face points up un-mirrored */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      transform: 'rotateX(180deg)',
+                      transformStyle: 'preserve-3d',
+                    }}
+                  >
+                    <DeckFace backlight={backlight} />
+                    {/* Front edge wall — the visible body thickness */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 6,
+                        right: 6,
+                        height: DECK_THICKNESS,
+                        transformOrigin: 'top center',
+                        transform: 'rotateX(-90deg)',
+                        background: ALU_EDGE,
+                        borderRadius: '0 0 12px 12px',
+                      }}
+                    />
+                    {/* Side walls */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        bottom: 6,
+                        left: '100%',
+                        width: DECK_THICKNESS,
+                        transformOrigin: 'left center',
+                        transform: 'rotateY(90deg)',
+                        background: '#a6a9af',
+                        borderRadius: '0 0 4px 4px',
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        bottom: 6,
+                        right: '100%',
+                        width: DECK_THICKNESS,
+                        transformOrigin: 'right center',
+                        transform: 'rotateY(-90deg)',
+                        background: '#a6a9af',
+                        borderRadius: '0 0 4px 4px',
+                      }}
+                    />
+                    {/* Bottom plate */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 3,
+                        transform: `translateZ(-${String(DECK_THICKNESS)}px)`,
+                        borderRadius: 16,
+                        background: '#b4b7bd',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* ── LID: scroll-scrubbed hinge rotation ── */}
+                <motion.div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    transformOrigin: 'bottom center',
+                    transformStyle: 'preserve-3d',
+                    rotateX: lidAngle,
+                    z: 1,
+                    willChange: 'transform',
+                  }}
+                >
+                  {/* Outer shell — what you see while it's closed */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      transform: 'rotateX(180deg) translateZ(1.5px)',
+                      backfaceVisibility: 'hidden',
+                      borderRadius: 14,
+                      background: ALU_SHELL,
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -8px 18px rgba(0,0,0,0.08)',
+                    }}
+                  >
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        borderRadius: 14,
+                        background:
+                          'linear-gradient(135deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.4) 100%)',
+                      }}
+                    />
+                    {/* Monogram */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '12%',
+                          aspectRatio: '1',
+                          borderRadius: '26%',
+                          background: 'linear-gradient(160deg, #c9ccd2 0%, #aeb1b7 100%)',
+                          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.7), inset 0 -1px 2px rgba(0,0,0,0.18)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span
+                          className="font-display"
+                          style={{
+                            fontWeight: 700,
+                            fontSize: 'clamp(13px, 2.2vw, 24px)',
+                            color: 'rgba(94,97,103,0.9)',
+                            letterSpacing: '-0.02em',
+                          }}
+                        >
+                          NF
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Display side — aluminum rim, black bezel, screen */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      transform: 'translateZ(1.5px)',
+                      backfaceVisibility: 'hidden',
+                      borderRadius: 14,
+                      background: ALU_SHELL,
+                      padding: 5,
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: 11,
+                        background: '#08080d',
+                        overflow: 'hidden',
+                        padding: 'clamp(10px, 2.6%, 20px) clamp(12px, 3%, 24px)',
+                        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      {/* Notch */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '13%',
+                          minWidth: 26,
+                          height: 8,
+                          borderRadius: '0 0 8px 8px',
+                          background: '#101014',
+                        }}
+                      />
+
+                      {/* Glass reflection sweep */}
+                      <motion.div
+                        aria-hidden="true"
+                        style={{
+                          position: 'absolute',
+                          inset: '-20%',
+                          width: '45%',
+                          x: sheenX,
+                          opacity: sheenOpacity,
+                          background:
+                            'linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)',
+                          mixBlendMode: 'screen',
+                          pointerEvents: 'none',
+                        }}
+                      />
+
+                      {/* Backlight vignette once powered on */}
+                      <motion.div
+                        aria-hidden="true"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          opacity: backlight,
+                          background: 'radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.06) 0%, transparent 60%)',
+                          pointerEvents: 'none',
+                        }}
+                      />
+
+                      <div style={{ position: 'relative', marginTop: 8 }}>
+                        <TerminalContent progress={contentProgress} />
+                      </div>
+
+                      {/* Power-on flash */}
+                      <motion.div
+                        aria-hidden="true"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          opacity: powerOn,
+                          background:
+                            'radial-gradient(circle at 50% 45%, rgba(255,250,240,0.95) 0%, rgba(224,123,0,0.35) 35%, transparent 70%)',
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Hinge bar */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '18%',
+                    right: '18%',
+                    bottom: -3,
+                    height: 6,
+                    borderRadius: 3,
+                    background: 'linear-gradient(180deg, #8d9096 0%, #5f6267 100%)',
+                    transform: 'translateZ(0.5px)',
+                  }}
+                />
+              </div>
+            </motion.div>
+
           </div>
         </motion.div>
 
