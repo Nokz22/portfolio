@@ -52,17 +52,19 @@ const LINES = [
 // Sized a notch larger than a literal top-down key would be, because the
 // rig's perspective tilt (see RIG_TILT) compresses the whole deck — this
 // keeps the keyboard reading with real presence once foreshortened,
-// instead of shrinking into an illegible sliver.
+// instead of shrinking into an illegible sliver. A domed per-key gradient
+// (not a flat fill) is what actually sells "individual keycap" rather
+// than "grid of tiles" — flat fills are the templated-mockup tell.
 function Key({ flex = 1 }: { flex?: number }) {
   return (
     <div
       style={{
         flex,
         height: 'clamp(13px, 2.3vw, 23px)',
-        background: '#f2f3f5',
+        background: 'linear-gradient(150deg, #fdfdfe 0%, #eef0f3 55%, #dfe2e6 100%)',
         borderRadius: 3,
-        border: '1px solid rgba(0,0,0,0.08)',
-        boxShadow: '0 1px 0 rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)',
+        border: '1px solid rgba(0,0,0,0.10)',
+        boxShadow: '0 1px 0 rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.95)',
       }}
     />
   )
@@ -110,34 +112,48 @@ function KeyboardDeck() {
   return (
     <div
       style={{
+        position: 'relative',
         background: 'linear-gradient(180deg, #e8eaed 0%, #d2d5da 100%)',
         borderRadius: '0 0 16px 16px',
         padding: '16px 20px 16px',
         boxShadow: '0 14px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.7)',
+        overflow: 'hidden',
       }}
     >
-      <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+      {/* Diagonal light catching the anodized deck — the cue that reads as
+          "real machined metal" instead of a flat UI panel. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(135deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.35) 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div style={{ position: 'relative', display: 'flex', gap: 4, marginBottom: 4 }}>
         {Array.from({ length: 14 }).map((_, i) => (
           <Key key={i} />
         ))}
       </div>
       {[14, 14, 13, 11].map((count, row) => (
-        <div key={row} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+        <div key={row} style={{ position: 'relative', display: 'flex', gap: 4, marginBottom: 4 }}>
           {Array.from({ length: count }).map((_, i) => (
             <Key key={i} flex={row === 3 && (i === 0 || i === count - 1) ? 1.8 : 1} />
           ))}
         </div>
       ))}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+      <div style={{ position: 'relative', display: 'flex', gap: 4, marginBottom: 10 }}>
         {[1, 1, 4, 1, 1].map((flex, i) => (
           <Key key={i} flex={flex} />
         ))}
       </div>
       <div
         style={{
+          position: 'relative',
           width: '36%',
           height: 'clamp(42px, 5.8vw, 72px)',
-          background: '#dde0e4',
+          background: 'linear-gradient(150deg, #e6e8ec 0%, #d3d6db 60%, #c5c8ce 100%)',
           borderRadius: 6,
           margin: '0 auto 4px',
           boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.6)',
@@ -164,6 +180,8 @@ function StaticLaptop() {
           <div style={{ paddingLeft: '3%', paddingRight: '3%' }}>
             <div
               style={{
+                position: 'relative',
+                overflow: 'hidden',
                 background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
                 borderRadius: '16px 16px 0 0',
                 padding: '9px 9px 0',
@@ -173,11 +191,21 @@ function StaticLaptop() {
                 transform: `rotateX(${String(LID_OPEN)}deg)`,
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(135deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.4) 100%)',
+                  pointerEvents: 'none',
+                }}
+              />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
                 <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
               </div>
               <div
                 style={{
+                  position: 'relative',
                   aspectRatio: SCREEN_ASPECT,
                   overflow: 'hidden',
                   background: '#08080d',
@@ -308,6 +336,7 @@ export default function LaptopReveal() {
                   shared rig tilt above. */}
               <motion.div
                 style={{
+                  position: 'relative',
                   background: 'linear-gradient(180deg, #eef0f3 0%, #d8dbe0 100%)',
                   borderRadius: '16px 16px 0 0',
                   padding: '9px 9px 0',
@@ -318,15 +347,27 @@ export default function LaptopReveal() {
                   rotateX: lidAngle,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
+                {/* Diagonal light on the lid bezel — same "machined metal"
+                    cue as the deck, so both halves read as one material. */}
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '16px 16px 0 0',
+                    background: 'linear-gradient(135deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.4) 100%)',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 3 }}>
                   <div style={{ width: '14%', minWidth: 28, height: 7, borderRadius: 999, background: '#101012' }} />
                 </div>
 
                 {/* Screen surface — stays flat within the rotating lid */}
                 <div
                   style={{
-                    aspectRatio: SCREEN_ASPECT,
                     position: 'relative',
+                    aspectRatio: SCREEN_ASPECT,
                     overflow: 'hidden',
                     background: '#08080d',
                     borderRadius: '6px 6px 0 0',
