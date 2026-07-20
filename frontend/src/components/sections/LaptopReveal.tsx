@@ -63,13 +63,18 @@ function rotateYMatrix(deg: number): string {
   const s = Math.sin(rad)
   return `matrix3d(${String(c)},0,${String(-s)},0, 0,1,0,0, ${String(s)},0,${String(c)},0, 0,0,0,1)`
 }
-const LID_CLOSED = -90 + SAFARI_EPSILON // folded flat onto the deck
+// The lid's own closed pose only needs a hair of margin off -90 — it uses
+// the backface-visibility two-face pattern (see the lid below), which was
+// never the thing that broke in Safari, so it doesn't need SAFARI_EPSILON's
+// much wider margin. Sharing that constant would leave the "closed" laptop
+// resting 25deg ajar instead of flat.
+const LID_CLOSED = -90 + 0.05 // folded flat onto the deck
 const LID_OPEN = 8 // a touch past vertical — natural recline
 const DECK_THICKNESS = 12 // px, extruded body height
 
-const ALU_TOP = 'linear-gradient(180deg, #f1f2f5 0%, #dddfe4 55%, #ced1d7 100%)'
-const ALU_SHELL = 'linear-gradient(160deg, #eef0f3 0%, #d6d9de 60%, #c3c6cc 100%)'
-const ALU_EDGE = 'linear-gradient(180deg, #dfe1e5 0%, #b5b8be 55%, #8b8e94 100%)'
+const ALU_TOP = 'linear-gradient(180deg, #3c3d41 0%, #2b2c2f 55%, #1d1e20 100%)'
+const ALU_SHELL = 'linear-gradient(160deg, #38393d 0%, #28292c 60%, #191a1c 100%)'
+const ALU_EDGE = 'linear-gradient(180deg, #2e2f32 0%, #1e1f21 55%, #121213 100%)'
 
 // Weighted hinge: slow to unstick, free through the middle, soft settle.
 const hingeEase = cubicBezier(0.65, 0, 0.35, 1)
@@ -97,10 +102,10 @@ function Key({ flex = 1 }: { flex?: number }) {
     <div
       style={{
         flex,
-        background: 'linear-gradient(150deg, #fdfdfe 0%, #eef0f3 55%, #dfe2e6 100%)',
+        background: 'linear-gradient(150deg, #4c4d52 0%, #35363a 55%, #222327 100%)',
         borderRadius: 4,
-        border: '1px solid rgba(0,0,0,0.10)',
-        boxShadow: '0 1px 0 rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.95)',
+        border: '1px solid rgba(0,0,0,0.35)',
+        boxShadow: '0 1px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.14)',
       }}
     />
   )
@@ -182,7 +187,7 @@ function DeckFace({ backlight }: { backlight: MotionValue<number> }) {
         borderRadius: 16,
         overflow: 'hidden',
         background: ALU_TOP,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -2px 8px rgba(0,0,0,0.10)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 8px rgba(0,0,0,0.45)',
       }}
     >
       {/* Diagonal light across the anodized deck */}
@@ -191,7 +196,7 @@ function DeckFace({ backlight }: { backlight: MotionValue<number> }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(135deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.35) 100%)',
+          background: 'linear-gradient(135deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.14) 100%)',
           pointerEvents: 'none',
         }}
       />
@@ -204,8 +209,8 @@ function DeckFace({ backlight }: { backlight: MotionValue<number> }) {
           right: '10%',
           height: '54%',
           borderRadius: 10,
-          background: 'linear-gradient(180deg, #d4d7dc 0%, #c7cad0 100%)',
-          boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.18)',
+          background: 'linear-gradient(180deg, #191a1c 0%, #101112 100%)',
+          boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.5)',
           padding: '1.4%',
           display: 'flex',
           flexDirection: 'column',
@@ -239,9 +244,9 @@ function DeckFace({ backlight }: { backlight: MotionValue<number> }) {
           right: '32%',
           height: '27%',
           borderRadius: 10,
-          background: 'linear-gradient(160deg, #e3e5e9 0%, #cdd0d6 100%)',
-          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.14), 0 1px 0 rgba(255,255,255,0.5)',
-          border: '1px solid rgba(0,0,0,0.07)',
+          background: 'linear-gradient(160deg, #2c2d31 0%, #1a1b1d 100%)',
+          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.05)',
         }}
       />
       {/* Screen light falling on the deck once the display powers on */}
@@ -302,6 +307,14 @@ export default function LaptopReveal() {
   const rawOpen = useTransform(scrollYProgress, [0.05, 0.62], [0, 1])
   const eased = useTransform(rawOpen, hingeEase)
   const lidAngle = useTransform(eased, [0, 1], [LID_CLOSED, LID_OPEN])
+
+  // The deck's own fold sits SAFARI_EPSILON off dead-flat (see the deck's
+  // render comment) so it stays visible once the lid lifts — a real
+  // laptop's base doesn't tilt as the lid opens, but there's no keyboard to
+  // see while it's closed either, so fading the deck in right as the hinge
+  // starts moving hides that static tilt instead of showing a keyboard
+  // poking out from under a "closed" lid.
+  const deckOpacity = useTransform(eased, [0, 0.08], [0, 1])
 
   // Camera choreography: constant slow yaw drift across the whole section
   // (so the object never sits still), and a pitch that starts top-down on
@@ -451,7 +464,7 @@ export default function LaptopReveal() {
                       backfaceVisibility: 'hidden',
                       borderRadius: 14,
                       background: ALU_SHELL,
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -8px 18px rgba(0,0,0,0.08)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -8px 18px rgba(0,0,0,0.35)',
                     }}
                   >
                     <div
@@ -461,10 +474,10 @@ export default function LaptopReveal() {
                         inset: 0,
                         borderRadius: 14,
                         background:
-                          'linear-gradient(135deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.4) 100%)',
+                          'linear-gradient(135deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0) 55%, rgba(255,255,255,0.16) 100%)',
                       }}
                     />
-                    {/* Monogram */}
+                    {/* Logo — etched into the lid, glossy against the matte shell */}
                     <div
                       style={{
                         position: 'absolute',
@@ -474,30 +487,17 @@ export default function LaptopReveal() {
                         justifyContent: 'center',
                       }}
                     >
-                      <div
+                      <span
+                        aria-hidden="true"
                         style={{
-                          width: '12%',
-                          aspectRatio: '1',
-                          borderRadius: '26%',
-                          background: 'linear-gradient(160deg, #c9ccd2 0%, #aeb1b7 100%)',
-                          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.7), inset 0 -1px 2px rgba(0,0,0,0.18)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                          fontSize: 'clamp(20px, 3vw, 34px)',
+                          lineHeight: 1,
+                          filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.5)) drop-shadow(0 -1px 0.5px rgba(255,255,255,0.15))',
+                          opacity: 0.92,
                         }}
                       >
-                        <span
-                          className="font-display"
-                          style={{
-                            fontWeight: 700,
-                            fontSize: 'clamp(13px, 2.2vw, 24px)',
-                            color: 'rgba(94,97,103,0.9)',
-                            letterSpacing: '-0.02em',
-                          }}
-                        >
-                          NF
-                        </span>
-                      </div>
+                        🍓
+                      </span>
                     </div>
                   </div>
 
@@ -604,7 +604,19 @@ export default function LaptopReveal() {
                     deckFoldMatrix's translate term lines the fold up
                     exactly where an earlier two-div fold+flip version used
                     to land it (verified by tracking reference points
-                    through both versions' matrices). */}
+                    through both versions' matrices).
+
+                    The opacity fade lives on a plain, non-transformed
+                    wrapper one level up rather than on this div itself —
+                    framer-motion's own transform pipeline conflicts with a
+                    hand-built matrix3d string the moment another motion
+                    value (like opacity) shares the same style object, and
+                    Safari is the one that actually breaks on it (Chromium
+                    tolerated it fine, which is what made this confusing to
+                    track down). */}
+                <motion.div
+                  style={{ position: 'absolute', inset: 0, transformStyle: 'preserve-3d', opacity: deckOpacity }}
+                >
                 <div
                   style={{
                     position: 'absolute',
@@ -639,7 +651,7 @@ export default function LaptopReveal() {
                       width: DECK_THICKNESS,
                       transformOrigin: 'left center',
                       transform: rotateYMatrix(90 - SAFARI_EPSILON),
-                      background: '#a6a9af',
+                      background: '#28292c',
                       borderRadius: '0 0 4px 4px',
                     }}
                   />
@@ -652,7 +664,7 @@ export default function LaptopReveal() {
                       width: DECK_THICKNESS,
                       transformOrigin: 'right center',
                       transform: rotateYMatrix(-90 + SAFARI_EPSILON),
-                      background: '#a6a9af',
+                      background: '#28292c',
                       borderRadius: '0 0 4px 4px',
                     }}
                   />
@@ -663,10 +675,11 @@ export default function LaptopReveal() {
                       inset: 3,
                       transform: `translateZ(-${String(DECK_THICKNESS)}px)`,
                       borderRadius: 16,
-                      background: '#b4b7bd',
+                      background: '#141516',
                     }}
                   />
                 </div>
+                </motion.div>
 
                 {/* Hinge bar */}
                 <div
@@ -677,7 +690,7 @@ export default function LaptopReveal() {
                     bottom: -3,
                     height: 6,
                     borderRadius: 3,
-                    background: 'linear-gradient(180deg, #8d9096 0%, #5f6267 100%)',
+                    background: 'linear-gradient(180deg, #38393d 0%, #1a1b1d 100%)',
                     transform: 'translateZ(0.5px)',
                   }}
                 />
