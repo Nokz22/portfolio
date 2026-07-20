@@ -1,0 +1,25 @@
+# Render Blueprint — deploys the Spring Boot backend on the free tier.
+# The frontend is deployed separately on Vercel (see frontend/vercel.json),
+# which proxies /api/* to this service so the browser stays same-origin.
+services:
+  - type: web
+    name: portfolio-backend
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: GITHUB_USERNAME
+        value: Nokz22
+      # Secrets — fill these in the Render dashboard when prompted
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CONTACT_RECIPIENT_EMAIL
+        sync: false
+      # Vercel proxies /api server-side, so browsers never hit this origin
+      # directly — kept permissive-by-config for direct API testing.
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://portfolio-nokz.vercel.app

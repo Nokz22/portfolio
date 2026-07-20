@@ -12,7 +12,15 @@ RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 COPY src src
 RUN ./gradlew bootJar --no-daemon -x test
 
+# ── Development (hot reload via Spring DevTools) ─────────────────
+FROM build AS development
+EXPOSE 8080
+ENTRYPOINT ["./gradlew", "bootRun", "--no-daemon"]
+
 # ── Production ───────────────────────────────────────────────────
+# Kept last on purpose: platforms that can't select a build target
+# (e.g. Render) build the final stage — which must be the slim JRE
+# image, not the gradle dev stage. Compose files pin their targets.
 FROM eclipse-temurin:17-jre-alpine AS runtime
 RUN addgroup -S portfolio && adduser -S portfolio -G portfolio
 WORKDIR /app
@@ -21,8 +29,3 @@ RUN chown portfolio:portfolio app.jar
 USER portfolio
 EXPOSE 8080
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
-
-# ── Development (hot reload via Spring DevTools) ─────────────────
-FROM build AS development
-EXPOSE 8080
-ENTRYPOINT ["./gradlew", "bootRun", "--no-daemon"]
