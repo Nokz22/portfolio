@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import {
   motion,
   useScroll,
@@ -27,7 +27,43 @@ import AmbientOrbs from '@/components/ui/AmbientOrbs'
 
 const SCREEN_ASPECT = '16 / 10.3'
 const PERSPECTIVE = 1500
-const LID_CLOSED = -90 // folded flat onto the deck
+// -90 exactly is a degenerate case for Safari's 3D compositor: a plane
+// rotated to dead-perpendicular inside nested preserve-3d gets silently
+// culled (this is what made the whole deck vanish in Safari/iOS — every
+// wall of the extruded body hinges on a "-90"). Every cardinal rotation
+// below is nudged a fraction of a degree off-axis so WebKit keeps a
+// non-degenerate transform matrix; the offset is invisible.
+const SAFARI_EPSILON = 25
+
+// Safari's 3D compositor doesn't reliably resolve `translateZ() rotateX()`
+// composed in a CSS transform list at a near-90deg fold (the deck ends up
+// silently culled — see the deck's render comment below). A raw matrix3d
+// sidesteps whatever Safari does internally to decompose/recompose chained
+// transform functions. This is the standard "translate after rotate, both
+// about the same origin" matrix: rotateX(deg) with a Z-translate of depthPx
+// baked into row 3 (see the deck comment for the derivation).
+function deckFoldMatrix(deg: number, depthPx: number): string {
+  const rad = (deg * Math.PI) / 180
+  const c = Math.cos(rad)
+  const s = Math.sin(rad)
+  return `matrix3d(1,0,0,0, 0,${String(c)},${String(s)},0, 0,${String(-s)},${String(c)},0, 0,0,${String(depthPx)},1)`
+}
+
+// Same Safari near-90deg reasoning applies to the extruded walls — a plain
+// matrix3d for a pure rotateX/rotateY, no translate term needed.
+function rotateXMatrix(deg: number): string {
+  const rad = (deg * Math.PI) / 180
+  const c = Math.cos(rad)
+  const s = Math.sin(rad)
+  return `matrix3d(1,0,0,0, 0,${String(c)},${String(s)},0, 0,${String(-s)},${String(c)},0, 0,0,0,1)`
+}
+function rotateYMatrix(deg: number): string {
+  const rad = (deg * Math.PI) / 180
+  const c = Math.cos(rad)
+  const s = Math.sin(rad)
+  return `matrix3d(${String(c)},0,${String(-s)},0, 0,1,0,0, ${String(s)},0,${String(c)},0, 0,0,0,1)`
+}
+const LID_CLOSED = -90 + SAFARI_EPSILON // folded flat onto the deck
 const LID_OPEN = 8 // a touch past vertical — natural recline
 const DECK_THICKNESS = 12 // px, extruded body height
 
@@ -228,6 +264,24 @@ export default function LaptopReveal() {
   const { t } = useTranslation()
   const reduced = useReducedMotion()
   const containerRef = useRef<HTMLDivElement>(null)
+  const hingeBoxRef = useRef<HTMLDivElement>(null)
+
+  // The deck's fold is expressed as a single rotateX + a translateZ measured
+  // to exactly match the hinge box's own rendered depth (see the deck's
+  // comment below for why it's built this way instead of nesting a second
+  // preserve-3d "flip" div). Measured live since the box is fluid-width.
+  const [deckDepth, setDeckDepth] = useState(0)
+  useLayoutEffect(() => {
+    const el = hingeBoxRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setDeckDepth(entry.contentRect.height)
+    })
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -363,6 +417,7 @@ export default function LaptopReveal() {
             >
               {/* Hinge box — the screen rect; both planes hinge on its bottom edge */}
               <div
+                ref={hingeBoxRef}
                 style={{
                   position: 'relative',
                   width: '100%',
@@ -370,81 +425,12 @@ export default function LaptopReveal() {
                   transformStyle: 'preserve-3d',
                 }}
               >
-                {/* ── DECK: lies flat toward the viewer ── */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    transformOrigin: 'bottom center',
-                    transform: 'rotateX(-90deg)',
-                    transformStyle: 'preserve-3d',
-                  }}
-                >
-                  {/* Inner flip so the deck face points up un-mirrored */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      transform: 'rotateX(180deg)',
-                      transformStyle: 'preserve-3d',
-                    }}
-                  >
-                    <DeckFace backlight={backlight} />
-                    {/* Front edge wall — the visible body thickness */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 6,
-                        right: 6,
-                        height: DECK_THICKNESS,
-                        transformOrigin: 'top center',
-                        transform: 'rotateX(-90deg)',
-                        background: ALU_EDGE,
-                        borderRadius: '0 0 12px 12px',
-                      }}
-                    />
-                    {/* Side walls */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 8,
-                        bottom: 6,
-                        left: '100%',
-                        width: DECK_THICKNESS,
-                        transformOrigin: 'left center',
-                        transform: 'rotateY(90deg)',
-                        background: '#a6a9af',
-                        borderRadius: '0 0 4px 4px',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 8,
-                        bottom: 6,
-                        right: '100%',
-                        width: DECK_THICKNESS,
-                        transformOrigin: 'right center',
-                        transform: 'rotateY(-90deg)',
-                        background: '#a6a9af',
-                        borderRadius: '0 0 4px 4px',
-                      }}
-                    />
-                    {/* Bottom plate */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 3,
-                        transform: `translateZ(-${String(DECK_THICKNESS)}px)`,
-                        borderRadius: 16,
-                        background: '#b4b7bd',
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* ── LID: scroll-scrubbed hinge rotation ── */}
+                {/* ── LID: scroll-scrubbed hinge rotation ──
+                    Rendered BEFORE the deck on purpose (see the deck's
+                    comment below the closing </motion.div> for why —
+                    Safari paints preserve-3d siblings in DOM order rather
+                    than true depth order, so whichever renders second wins
+                    any overlap). */}
                 <motion.div
                   style={{
                     position: 'absolute',
@@ -601,6 +587,86 @@ export default function LaptopReveal() {
                     </div>
                   </div>
                 </motion.div>
+
+                {/* ── DECK: lies flat toward the viewer ──
+                    Rendered AFTER the lid — see the lid's comment above.
+                    Safari doesn't true-depth-sort preserve-3d siblings, it
+                    paints them in DOM order, so the deck has to come last
+                    to stay visible once the lid has rotated open and no
+                    longer physically covers it (their screen-space boxes
+                    still overlap at this camera angle even when open,
+                    which is what made the deck vanish before this reorder).
+                    A raw matrix3d (see deckFoldMatrix above), not a chained
+                    `translateZ() rotateX()`, because Safari also doesn't
+                    reliably resolve that composed near-90deg fold on its
+                    own — a single literal matrix sidesteps whatever it does
+                    internally to decompose/recompose chained functions;
+                    deckFoldMatrix's translate term lines the fold up
+                    exactly where an earlier two-div fold+flip version used
+                    to land it (verified by tracking reference points
+                    through both versions' matrices). */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    transformOrigin: 'bottom center',
+                    transform: deckFoldMatrix(90 - SAFARI_EPSILON, deckDepth),
+                    transformStyle: 'preserve-3d',
+                  }}
+                >
+                  <DeckFace backlight={backlight} />
+                  {/* Front edge wall — the visible body thickness */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 6,
+                      right: 6,
+                      height: DECK_THICKNESS,
+                      transformOrigin: 'top center',
+                      transform: rotateXMatrix(-90 + SAFARI_EPSILON),
+                      background: ALU_EDGE,
+                      borderRadius: '0 0 12px 12px',
+                    }}
+                  />
+                  {/* Side walls */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      bottom: 6,
+                      left: '100%',
+                      width: DECK_THICKNESS,
+                      transformOrigin: 'left center',
+                      transform: rotateYMatrix(90 - SAFARI_EPSILON),
+                      background: '#a6a9af',
+                      borderRadius: '0 0 4px 4px',
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      bottom: 6,
+                      right: '100%',
+                      width: DECK_THICKNESS,
+                      transformOrigin: 'right center',
+                      transform: rotateYMatrix(-90 + SAFARI_EPSILON),
+                      background: '#a6a9af',
+                      borderRadius: '0 0 4px 4px',
+                    }}
+                  />
+                  {/* Bottom plate */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 3,
+                      transform: `translateZ(-${String(DECK_THICKNESS)}px)`,
+                      borderRadius: 16,
+                      background: '#b4b7bd',
+                    }}
+                  />
+                </div>
 
                 {/* Hinge bar */}
                 <div
