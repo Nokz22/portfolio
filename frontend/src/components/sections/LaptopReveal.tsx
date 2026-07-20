@@ -63,12 +63,7 @@ function rotateYMatrix(deg: number): string {
   const s = Math.sin(rad)
   return `matrix3d(${String(c)},0,${String(-s)},0, 0,1,0,0, ${String(s)},0,${String(c)},0, 0,0,0,1)`
 }
-// The lid's own closed pose only needs a hair of margin off -90 — it uses
-// the backface-visibility two-face pattern (see the lid below), which was
-// never the thing that broke in Safari, so it doesn't need SAFARI_EPSILON's
-// much wider margin. Sharing that constant would leave the "closed" laptop
-// resting 25deg ajar instead of flat.
-const LID_CLOSED = -90 + 0.05 // folded flat onto the deck
+const LID_CLOSED = -90 + SAFARI_EPSILON // folded flat onto the deck
 const LID_OPEN = 8 // a touch past vertical — natural recline
 const DECK_THICKNESS = 12 // px, extruded body height
 
@@ -307,14 +302,6 @@ export default function LaptopReveal() {
   const rawOpen = useTransform(scrollYProgress, [0.05, 0.62], [0, 1])
   const eased = useTransform(rawOpen, hingeEase)
   const lidAngle = useTransform(eased, [0, 1], [LID_CLOSED, LID_OPEN])
-
-  // The deck's own fold sits SAFARI_EPSILON off dead-flat (see the deck's
-  // render comment) so it stays visible once the lid lifts — a real
-  // laptop's base doesn't tilt as the lid opens, but there's no keyboard to
-  // see while it's closed either, so fading the deck in right as the hinge
-  // starts moving hides that static tilt instead of showing a keyboard
-  // poking out from under a "closed" lid.
-  const deckOpacity = useTransform(eased, [0, 0.08], [0, 1])
 
   // Camera choreography: constant slow yaw drift across the whole section
   // (so the object never sits still), and a pitch that starts top-down on
@@ -604,19 +591,7 @@ export default function LaptopReveal() {
                     deckFoldMatrix's translate term lines the fold up
                     exactly where an earlier two-div fold+flip version used
                     to land it (verified by tracking reference points
-                    through both versions' matrices).
-
-                    The opacity fade lives on a plain, non-transformed
-                    wrapper one level up rather than on this div itself —
-                    framer-motion's own transform pipeline conflicts with a
-                    hand-built matrix3d string the moment another motion
-                    value (like opacity) shares the same style object, and
-                    Safari is the one that actually breaks on it (Chromium
-                    tolerated it fine, which is what made this confusing to
-                    track down). */}
-                <motion.div
-                  style={{ position: 'absolute', inset: 0, transformStyle: 'preserve-3d', opacity: deckOpacity }}
-                >
+                    through both versions' matrices). */}
                 <div
                   style={{
                     position: 'absolute',
@@ -679,7 +654,6 @@ export default function LaptopReveal() {
                     }}
                   />
                 </div>
-                </motion.div>
 
                 {/* Hinge bar */}
                 <div
